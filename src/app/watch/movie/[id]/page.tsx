@@ -1,0 +1,99 @@
+import React from "react";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { getMovieDetails } from "@/lib/tmdb";
+import { getMovieSources, getDemoSampleSources } from "@/lib/omss";
+import { VideoPlayer } from "@/components/video-player/VideoPlayer";
+import { ArrowLeft, Sparkles } from "lucide-react";
+
+interface WatchMoviePageProps {
+  params: {
+    id: string;
+  };
+  searchParams: {
+    t?: string;
+    demo?: string;
+  };
+}
+
+export const dynamic = "force-dynamic";
+
+export default async function WatchMoviePage({
+  params,
+  searchParams,
+}: WatchMoviePageProps) {
+  const movieId = parseInt(params.id, 10);
+  if (isNaN(movieId)) notFound();
+
+  const initialTime = searchParams.t ? parseInt(searchParams.t, 10) : 0;
+  const isDemoRequested = searchParams.demo === "true";
+
+  const [movie, omssResult] = await Promise.all([
+    getMovieDetails(movieId),
+    getMovieSources(movieId),
+  ]);
+
+  if (!movie) notFound();
+
+  // If OMSS result has sources, use them; otherwise ensure fallback stream
+  const finalSources =
+    omssResult.data?.sources && omssResult.data.sources.length > 0
+      ? omssResult.data.sources
+      : getDemoSampleSources(movieId, "movie").sources;
+
+  const finalSubtitles =
+    omssResult.data?.subtitles && omssResult.data.subtitles.length > 0
+      ? omssResult.data.subtitles
+      : getDemoSampleSources(movieId, "movie").subtitles || [];
+
+  const isDemoActive = Boolean(omssResult.isDemoFallback || isDemoRequested);
+
+  return (
+    <div className="min-h-screen bg-[#09090b] text-white flex flex-col justify-center items-center px-2 sm:px-6 lg:px-8 py-6">
+      <div className="w-full max-w-6xl space-y-4">
+        {/* Navigation Bar Above Player */}
+        <div className="flex items-center justify-between">
+          <Link
+            href={`/movie/${movie.id}`}
+            className="inline-flex items-center gap-2 text-xs font-semibold text-zinc-400 hover:text-white transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back to Movie Details</span>
+          </Link>
+
+          {isDemoActive && (
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-700/80 text-zinc-300 text-xs font-medium">
+              <Sparkles className="w-3.5 h-3.5 text-[#e50914]" />
+              <span>Streaming Engine Active</span>
+            </div>
+          )}
+        </div>
+
+        {/* Video Player */}
+        <VideoPlayer
+          sources={finalSources}
+          subtitles={finalSubtitles}
+          mediaType="movie"
+          tmdbId={movie.id}
+          title={movie.title}
+          posterPath={movie.poster_path}
+          backdropPath={movie.backdrop_path}
+          initialTime={initialTime}
+        />
+
+        {/* Title metadata footer */}
+        <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-zinc-400">
+          <div>
+            <h1 className="text-base font-bold text-white">{movie.title}</h1>
+            <p className="text-zinc-400 mt-0.5 line-clamp-1">{movie.overview}</p>
+          </div>
+          <div className="flex items-center gap-2 font-mono text-[11px] text-zinc-500 flex-shrink-0">
+            <span>TMDB: {movie.id}</span>
+            <span>•</span>
+            <span>Runtime: {movie.runtime ? `${movie.runtime}m` : "N/A"}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
