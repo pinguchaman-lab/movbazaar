@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDemoSampleSources } from "@/lib/omss";
+import { getMovieDetails, getMovieTrailer } from "@/lib/tmdb";
 
 export async function GET(
   req: NextRequest,
@@ -13,7 +14,19 @@ export async function GET(
     );
   }
 
-  const response = getDemoSampleSources(tmdbId, "movie");
+  const [movie, trailerKey] = await Promise.all([
+    getMovieDetails(tmdbId),
+    getMovieTrailer(tmdbId),
+  ]);
+
+  const isUpcoming = Boolean(
+    movie?.release_date && new Date(movie.release_date).getTime() > Date.now()
+  );
+
+  const response = getDemoSampleSources(tmdbId, "movie", undefined, undefined, {
+    trailerKey,
+    isUpcoming,
+  });
   return NextResponse.json(response);
 }
 

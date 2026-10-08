@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDemoSampleSources } from "@/lib/omss";
+import { getTVTrailer } from "@/lib/tmdb";
 
 export async function GET(
   req: NextRequest,
@@ -20,7 +21,10 @@ export async function GET(
     );
   }
 
-  const response = getDemoSampleSources(tmdbId, "tv", season, episode);
+  const trailerKey = await getTVTrailer(tmdbId);
+  const response = getDemoSampleSources(tmdbId, "tv", season, episode, {
+    trailerKey,
+  });
   return NextResponse.json(response);
 }
 

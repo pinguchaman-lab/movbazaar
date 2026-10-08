@@ -42,6 +42,8 @@ interface VideoPlayerProps {
   nextEpisodeNumber?: number;
   nextEpisodeTitle?: string;
   initialTime?: number;
+  activeSourceId?: string;
+  onSourceChange?: (source: StreamSource) => void;
 }
 
 export function VideoPlayer({
@@ -59,15 +61,19 @@ export function VideoPlayer({
   nextEpisodeNumber,
   nextEpisodeTitle,
   initialTime = 0,
+  activeSourceId,
+  onSourceChange,
 }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const hlsRef = useRef<Hls | null>(null);
 
   // Active source
-  const [activeSource, setActiveSource] = useState<StreamSource>(
-    sources[0] || null
-  );
+  const initialSource =
+    (activeSourceId && sources.find((s) => s.id === activeSourceId)) ||
+    sources[0] ||
+    null;
+  const [activeSource, setActiveSource] = useState<StreamSource>(initialSource);
 
   // Playback state
   const [isPlaying, setIsPlaying] = useState(false);
@@ -100,6 +106,25 @@ export function VideoPlayer({
   const [selectedSubtitleId, setSelectedSubtitleId] = useState<string>("off");
 
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Synchronize when activeSourceId is updated externally
+  useEffect(() => {
+    if (activeSourceId) {
+      const match = sources.find((s) => s.id === activeSourceId);
+      if (match && match.id !== activeSource.id) {
+        setActiveSource(match);
+        setIsFinished(false);
+        setPlayerError(null);
+        if (match.type === "embed") {
+          setIsBuffering(false);
+          if (hlsRef.current) {
+            hlsRef.current.destroy();
+            hlsRef.current = null;
+          }
+        }
+      }
+    }
+  }, [activeSourceId, sources, activeSource.id]);
 
   // Format seconds to mm:ss or hh:mm:ss
   const formatTime = (secs: number) => {
@@ -558,6 +583,7 @@ export function VideoPlayer({
     setActiveSource(source);
     setIsFinished(false);
     setPlayerError(null);
+    onSourceChange?.(source);
     if (source.type === "embed") {
       setIsBuffering(false);
       if (hlsRef.current) {
@@ -582,6 +608,7 @@ export function VideoPlayer({
       {/* Video Element or Embed Stream */}
       {activeSource.type === "embed" ? (
         <iframe
+          key={activeSource.id}
           src={activeSource.url}
           className="w-full h-full border-0 bg-black"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"

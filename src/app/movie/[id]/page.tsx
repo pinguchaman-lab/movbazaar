@@ -30,6 +30,9 @@ export default async function MovieDetailsPage({ params }: MoviePageProps) {
   const director = credits?.crew?.find((c) => c.job === "Director");
   const topCast = credits?.cast?.slice(0, 8) || [];
   const year = movie.release_date ? new Date(movie.release_date).getFullYear() : "";
+  const isUpcoming = Boolean(
+    movie.release_date && new Date(movie.release_date).getTime() > Date.now()
+  );
 
   return (
     <div className="min-h-screen pb-16">
@@ -69,6 +72,11 @@ export default async function MovieDetailsPage({ params }: MoviePageProps) {
                 <span className="uppercase px-2 py-0.5 rounded bg-[#e50914] text-white text-[11px] font-bold">
                   Movie
                 </span>
+                {isUpcoming && (
+                  <span className="uppercase px-2 py-0.5 rounded bg-amber-600/80 text-white text-[11px] font-bold">
+                    Upcoming
+                  </span>
+                )}
                 {year && <span>{year}</span>}
                 {movie.runtime ? (
                   <span className="flex items-center gap-1">
@@ -120,26 +128,34 @@ export default async function MovieDetailsPage({ params }: MoviePageProps) {
             )}
 
             {/* Action Buttons */}
-            <div className="flex flex-wrap items-center gap-3 pt-3">
-              <Link
-                href={`/watch/movie/${movie.id}`}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#e50914] hover:bg-[#f40612] text-white font-bold text-sm shadow-xl shadow-red-950/40 hover:scale-105 active:scale-95 transition-all"
-              >
-                <Play className="w-5 h-5 fill-white" />
-                <span>Watch Now</span>
-              </Link>
+            <div className="space-y-2 pt-2">
+              <div className="flex flex-wrap items-center gap-3">
+                <Link
+                  href={`/watch/movie/${movie.id}`}
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#e50914] hover:bg-[#f40612] text-white font-bold text-sm shadow-xl shadow-red-950/40 hover:scale-105 active:scale-95 transition-all"
+                >
+                  <Play className="w-5 h-5 fill-white" />
+                  <span>{isUpcoming ? "Watch Official Trailer" : "Watch Now"}</span>
+                </Link>
 
-              <WatchlistButton
-                item={{
-                  tmdbId: movie.id,
-                  type: "movie",
-                  title: movie.title,
-                  posterPath: movie.poster_path,
-                  backdropPath: movie.backdrop_path,
-                  voteAverage: movie.vote_average,
-                  releaseYear: year ? String(year) : undefined,
-                }}
-              />
+                <WatchlistButton
+                  item={{
+                    tmdbId: movie.id,
+                    type: "movie",
+                    title: movie.title,
+                    posterPath: movie.poster_path,
+                    backdropPath: movie.backdrop_path,
+                    voteAverage: movie.vote_average,
+                    releaseYear: year ? String(year) : undefined,
+                  }}
+                />
+              </div>
+
+              {isUpcoming && (
+                <p className="text-xs text-amber-300/90 font-medium pt-1">
+                  Scheduled release: {movie.release_date}. The official HD trailer is available to watch now.
+                </p>
+              )}
             </div>
 
             {/* OMSS Availability Checker */}

@@ -107,6 +107,17 @@ export interface TMDBPaginatedResponse<T> {
   total_results: number;
 }
 
+export interface TMDBVideo {
+  id: string;
+  key: string;
+  name: string;
+  site: string;
+  size: number;
+  type: string;
+  official: boolean;
+  published_at?: string;
+}
+
 export type MediaItem = (
   | (TMDBMovie & { media_type?: "movie" })
   | (TMDBTVShow & { media_type?: "tv" })

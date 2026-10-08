@@ -7,6 +7,7 @@ import {
   TMDBGenre,
   TMDBPaginatedResponse,
   MediaItem,
+  TMDBVideo,
 } from "@/types/tmdb";
 import {
   FALLBACK_MOVIES,
@@ -335,6 +336,44 @@ export async function getTVCredits(id: number): Promise<TMDBCredits | null> {
   if (data) return data;
 
   return FALLBACK_CREDITS[id] || { id, cast: [], crew: [] };
+}
+
+export async function getMovieTrailer(id: number): Promise<string | null> {
+  const data = await tmdbFetch<{ results: TMDBVideo[] }>(`/movie/${id}/videos`);
+  if (!data?.results || data.results.length === 0) return null;
+
+  const videos = data.results.filter((v) => v.site === "YouTube");
+  const officialTrailer = videos.find(
+    (v) => v.type === "Trailer" && v.official
+  );
+  if (officialTrailer) return officialTrailer.key;
+
+  const anyTrailer = videos.find((v) => v.type === "Trailer");
+  if (anyTrailer) return anyTrailer.key;
+
+  const teaser = videos.find((v) => v.type === "Teaser");
+  if (teaser) return teaser.key;
+
+  return videos[0]?.key || null;
+}
+
+export async function getTVTrailer(id: number): Promise<string | null> {
+  const data = await tmdbFetch<{ results: TMDBVideo[] }>(`/tv/${id}/videos`);
+  if (!data?.results || data.results.length === 0) return null;
+
+  const videos = data.results.filter((v) => v.site === "YouTube");
+  const officialTrailer = videos.find(
+    (v) => v.type === "Trailer" && v.official
+  );
+  if (officialTrailer) return officialTrailer.key;
+
+  const anyTrailer = videos.find((v) => v.type === "Trailer");
+  if (anyTrailer) return anyTrailer.key;
+
+  const teaser = videos.find((v) => v.type === "Teaser");
+  if (teaser) return teaser.key;
+
+  return videos[0]?.key || null;
 }
 
 export async function searchMulti(

@@ -1,10 +1,10 @@
 import React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getTVDetails, getTVSeasonDetails } from "@/lib/tmdb";
+import { getTVDetails, getTVSeasonDetails, getTVTrailer } from "@/lib/tmdb";
 import { getEpisodeSources, getDemoSampleSources } from "@/lib/omss";
-import { VideoPlayer } from "@/components/video-player/VideoPlayer";
-import { ArrowLeft, Play } from "lucide-react";
+import { WatchPlayerContainer } from "@/components/video-player/WatchPlayerContainer";
+import { ArrowLeft, Play, Sparkles } from "lucide-react";
 
 interface WatchTVPageProps {
   params: {
@@ -33,13 +33,17 @@ export default async function WatchTVPage({
   const initialTime = searchParams.t ? parseInt(searchParams.t, 10) : 0;
   const isDemoRequested = searchParams.demo === "true";
 
-  const [tvShow, seasonDetail, omssResult] = await Promise.all([
+  const [tvShow, seasonDetail, trailerKey] = await Promise.all([
     getTVDetails(tvId),
     getTVSeasonDetails(tvId, seasonNum),
-    getEpisodeSources(tvId, seasonNum, episodeNum),
+    getTVTrailer(tvId),
   ]);
 
   if (!tvShow) notFound();
+
+  const omssResult = await getEpisodeSources(tvId, seasonNum, episodeNum, {
+    trailerKey,
+  });
 
   const currentEp = seasonDetail?.episodes?.find(
     (e) => e.episode_number === episodeNum
@@ -53,8 +57,9 @@ export default async function WatchTVPage({
 
   if (episodeNum < totalEpisodesInSeason) {
     nextEpisodeNumber = episodeNum + 1;
-    nextEpisodeUrl = `/watch/tv/${tvId}/${seasonNum}/${nextEpisodeNumber}${isDemoRequested ? "?demo=true" : ""
-      }`;
+    nextEpisodeUrl = `/watch/tv/${tvId}/${seasonNum}/${nextEpisodeNumber}${
+      isDemoRequested ? "?demo=true" : ""
+    }`;
     const nextEpObj = seasonDetail?.episodes?.find(
       (e) => e.episode_number === nextEpisodeNumber
     );
@@ -65,12 +70,16 @@ export default async function WatchTVPage({
   const finalSources =
     omssResult.data?.sources && omssResult.data.sources.length > 0
       ? omssResult.data.sources
-      : getDemoSampleSources(tvId, "tv", seasonNum, episodeNum).sources;
+      : getDemoSampleSources(tvId, "tv", seasonNum, episodeNum, {
+          trailerKey,
+        }).sources;
 
   const finalSubtitles =
     omssResult.data?.subtitles && omssResult.data.subtitles.length > 0
       ? omssResult.data.subtitles
-      : getDemoSampleSources(tvId, "tv", seasonNum, episodeNum).subtitles || [];
+      : getDemoSampleSources(tvId, "tv", seasonNum, episodeNum, {
+          trailerKey,
+        }).subtitles || [];
 
   const isDemoActive = Boolean(omssResult.isDemoFallback || isDemoRequested);
 
@@ -89,14 +98,14 @@ export default async function WatchTVPage({
 
           {isDemoActive && (
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-700/80 text-zinc-300 text-xs font-medium">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Streaming Engine Active</span>
+              <Sparkles className="w-3.5 h-3.5 text-[#e50914]" />
+              <span>Multi-Mirror Engine</span>
             </div>
           )}
         </div>
 
-        {/* Video Player */}
-        <VideoPlayer
+        {/* Video Player & Server Selector Container */}
+        <WatchPlayerContainer
           sources={finalSources}
           subtitles={finalSubtitles}
           mediaType="tv"

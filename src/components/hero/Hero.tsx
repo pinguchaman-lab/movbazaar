@@ -88,6 +88,11 @@ export function Hero({ item }: HeroProps) {
             <span className="uppercase tracking-wider px-2 py-0.5 rounded bg-[#e50914] text-white text-[11px] font-bold">
               {type === "movie" ? "Featured Movie" : "Featured Series"}
             </span>
+            {releaseDate && new Date(releaseDate).getTime() > Date.now() && (
+              <span className="uppercase tracking-wider px-2 py-0.5 rounded bg-amber-600/90 text-white text-[11px] font-bold">
+                Upcoming
+              </span>
+            )}
             {item.vote_average > 0 && (
               <span className="flex items-center gap-1 text-cinema-gold bg-black/60 px-2 py-0.5 rounded border border-white/10">
                 <Star className="w-3.5 h-3.5 fill-cinema-gold" />
@@ -131,7 +136,11 @@ export function Hero({ item }: HeroProps) {
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#e50914] hover:bg-[#f40612] text-white font-bold text-sm shadow-xl shadow-red-950/40 hover:scale-105 active:scale-95 transition-all"
             >
               <Play className="w-5 h-5 fill-white" />
-              <span>{t.common.watchNow}</span>
+              <span>
+                {releaseDate && new Date(releaseDate).getTime() > Date.now()
+                  ? "Watch Trailer"
+                  : t.common.watchNow}
+              </span>
             </Link>
 
             <Link

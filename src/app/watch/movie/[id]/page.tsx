@@ -1,10 +1,10 @@
 import React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getMovieDetails } from "@/lib/tmdb";
+import { getMovieDetails, getMovieTrailer } from "@/lib/tmdb";
 import { getMovieSources, getDemoSampleSources } from "@/lib/omss";
-import { VideoPlayer } from "@/components/video-player/VideoPlayer";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { WatchPlayerContainer } from "@/components/video-player/WatchPlayerContainer";
+import { ArrowLeft, Sparkles, Calendar } from "lucide-react";
 
 interface WatchMoviePageProps {
   params: {
@@ -28,23 +28,38 @@ export default async function WatchMoviePage({
   const initialTime = searchParams.t ? parseInt(searchParams.t, 10) : 0;
   const isDemoRequested = searchParams.demo === "true";
 
-  const [movie, omssResult] = await Promise.all([
+  const [movie, trailerKey] = await Promise.all([
     getMovieDetails(movieId),
-    getMovieSources(movieId),
+    getMovieTrailer(movieId),
   ]);
 
   if (!movie) notFound();
+
+  const isUpcoming = Boolean(
+    movie.release_date && new Date(movie.release_date).getTime() > Date.now()
+  );
+
+  const omssResult = await getMovieSources(movieId, {
+    trailerKey,
+    isUpcoming,
+  });
 
   // If OMSS result has sources, use them; otherwise ensure fallback stream
   const finalSources =
     omssResult.data?.sources && omssResult.data.sources.length > 0
       ? omssResult.data.sources
-      : getDemoSampleSources(movieId, "movie").sources;
+      : getDemoSampleSources(movieId, "movie", undefined, undefined, {
+          trailerKey,
+          isUpcoming,
+        }).sources;
 
   const finalSubtitles =
     omssResult.data?.subtitles && omssResult.data.subtitles.length > 0
       ? omssResult.data.subtitles
-      : getDemoSampleSources(movieId, "movie").subtitles || [];
+      : getDemoSampleSources(movieId, "movie", undefined, undefined, {
+          trailerKey,
+          isUpcoming,
+        }).subtitles || [];
 
   const isDemoActive = Boolean(omssResult.isDemoFallback || isDemoRequested);
 
@@ -61,16 +76,24 @@ export default async function WatchMoviePage({
             <span>Back to Movie Details</span>
           </Link>
 
-          {isDemoActive && (
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-700/80 text-zinc-300 text-xs font-medium">
-              <Sparkles className="w-3.5 h-3.5 text-[#e50914]" />
-              <span>Streaming Engine Active</span>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            {isUpcoming && (
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-medium">
+                <Calendar className="w-3.5 h-3.5" />
+                <span>Pre-Release Title</span>
+              </div>
+            )}
+            {isDemoActive && (
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-700/80 text-zinc-300 text-xs font-medium">
+                <Sparkles className="w-3.5 h-3.5 text-[#e50914]" />
+                <span>Multi-Mirror Engine</span>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Video Player */}
-        <VideoPlayer
+        {/* Video Player & Server Selector Container */}
+        <WatchPlayerContainer
           sources={finalSources}
           subtitles={finalSubtitles}
           mediaType="movie"
@@ -79,6 +102,7 @@ export default async function WatchMoviePage({
           posterPath={movie.poster_path}
           backdropPath={movie.backdrop_path}
           initialTime={initialTime}
+          isUpcoming={isUpcoming}
         />
 
         {/* Title metadata footer */}
@@ -91,9 +115,16 @@ export default async function WatchMoviePage({
             <span>TMDB: {movie.id}</span>
             <span>•</span>
             <span>Runtime: {movie.runtime ? `${movie.runtime}m` : "N/A"}</span>
+            {movie.release_date && (
+              <>
+                <span>•</span>
+                <span>Release: {movie.release_date}</span>
+              </>
+            )}
           </div>
         </div>
       </div>
     </div>
   );
 }
+

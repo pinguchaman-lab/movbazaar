@@ -73,6 +73,13 @@ export function MovieCard({
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
 
+        {/* Upcoming badge top-left if pre-release */}
+        {releaseDate && new Date(releaseDate).getTime() > Date.now() && (
+          <div className="absolute top-2 left-2 bg-amber-600/90 backdrop-blur-md px-1.5 py-0.5 rounded text-[10px] font-bold text-white uppercase tracking-wider shadow-md">
+            Upcoming
+          </div>
+        )}
+
         {/* Rating Badge top-right */}
         <div className="absolute top-2 right-2 bg-black/75 backdrop-blur-md px-1.5 py-0.5 rounded text-[11px] font-semibold text-cinema-gold flex items-center gap-1 border border-white/10 shadow-md">
           <Star className="w-3 h-3 fill-cinema-gold text-cinema-gold" />
@@ -85,7 +92,11 @@ export function MovieCard({
             href={playHref}
             onClick={(e) => e.stopPropagation()}
             className="w-10 h-10 rounded-full bg-[#e50914] text-white flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-transform"
-            title="Watch Now"
+            title={
+              releaseDate && new Date(releaseDate).getTime() > Date.now()
+                ? "Watch Trailer"
+                : "Watch Now"
+            }
           >
             <Play className="w-5 h-5 fill-white ml-0.5" />
           </Link>
