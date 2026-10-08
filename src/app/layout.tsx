@@ -5,6 +5,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { LoginModal } from "@/components/auth/LoginModal";
 import { Navbar } from "@/components/navbar/Navbar";
 import { AdScripts } from "@/components/ads/AdScripts";
+import { Analytics } from "@vercel/analytics/next";
 import Link from "next/link";
 import { Play, Sparkles, Shield, Film, Tv, Globe, Clapperboard } from "lucide-react";
 
@@ -332,6 +333,7 @@ export default function RootLayout({
             </footer>
           </LanguageProvider>
         </AuthProvider>
+        <Analytics />
       </body>
     </html>
   );
