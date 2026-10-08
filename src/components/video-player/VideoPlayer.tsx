@@ -228,6 +228,12 @@ export function VideoPlayer({
         hlsRef.current = null;
       }
 
+      if (source.type === "embed") {
+        setIsBuffering(false);
+        setPlayerError(null);
+        return;
+      }
+
       const isM3u8 =
         source.type === "hls" ||
         source.url.includes(".m3u8") ||
@@ -551,6 +557,14 @@ export function VideoPlayer({
   const handleSourceSelect = (source: StreamSource) => {
     setActiveSource(source);
     setIsFinished(false);
+    setPlayerError(null);
+    if (source.type === "embed") {
+      setIsBuffering(false);
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+    }
   };
 
   const backUrl =
@@ -565,29 +579,39 @@ export function VideoPlayer({
       onClick={handleUserActivity}
       className="relative w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl select-none group/player"
     >
-      {/* Video Element */}
-      <video
-        ref={videoRef}
-        crossOrigin="anonymous"
-        className="w-full h-full object-contain cursor-pointer"
-        onClick={togglePlay}
-        playsInline
-      >
-        {/* Subtitle tracks */}
-        {subtitles.map((sub, index) => (
-          <track
-            key={sub.id || index}
-            src={sub.url}
-            kind="subtitles"
-            label={sub.label}
-            srcLang={sub.language || "en"}
-            default={sub.default}
-          />
-        ))}
-      </video>
+      {/* Video Element or Embed Stream */}
+      {activeSource.type === "embed" ? (
+        <iframe
+          src={activeSource.url}
+          className="w-full h-full border-0 bg-black"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+          title={title}
+        />
+      ) : (
+        <video
+          ref={videoRef}
+          crossOrigin="anonymous"
+          className="w-full h-full object-contain cursor-pointer"
+          onClick={togglePlay}
+          playsInline
+        >
+          {/* Subtitle tracks */}
+          {subtitles.map((sub, index) => (
+            <track
+              key={sub.id || index}
+              src={sub.url}
+              kind="subtitles"
+              label={sub.label}
+              srcLang={sub.language || "en"}
+              default={sub.default}
+            />
+          ))}
+        </video>
+      )}
 
-      {/* Buffering Indicator */}
-      {isBuffering && !playerError && (
+      {/* Buffering Indicator for native video */}
+      {isBuffering && activeSource.type !== "embed" && !playerError && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/40 pointer-events-none z-20">
           <Loader2 className="w-12 h-12 text-[#e50914] animate-spin" />
         </div>
@@ -672,12 +696,13 @@ export function VideoPlayer({
         </div>
       </div>
 
-      {/* Bottom Controls Overlay */}
-      <div
-        className={`absolute bottom-0 left-0 right-0 z-30 p-4 sm:p-6 bg-gradient-to-t from-black/95 via-black/60 to-transparent transition-opacity duration-300 ${
-          showControls || !isPlaying ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
-      >
+      {/* Bottom Controls Overlay for Native Video */}
+      {activeSource.type !== "embed" && (
+        <div
+          className={`absolute bottom-0 left-0 right-0 z-30 p-4 sm:p-6 bg-gradient-to-t from-black/95 via-black/60 to-transparent transition-opacity duration-300 ${
+            showControls || !isPlaying ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
+        >
         <div className="space-y-3">
           {/* Progress Seek Bar */}
           <div className="relative group/seekbar flex items-center">
@@ -843,6 +868,30 @@ export function VideoPlayer({
           </div>
         </div>
       </div>
+    )}
+
+      {/* Embedded Stream Server Indicator Pill */}
+      {activeSource.type === "embed" && (
+        <div
+          className={`absolute bottom-3 left-4 right-4 z-20 flex items-center justify-between pointer-events-none transition-opacity duration-300 ${
+            showControls ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          <div className="px-3 py-1.5 rounded-full bg-black/80 backdrop-blur-md border border-white/10 text-[11px] text-zinc-300 pointer-events-auto flex items-center gap-2 shadow-xl">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>
+              Streaming via{" "}
+              <strong className="text-white">
+                {activeSource.provider?.name || activeSource.id}
+              </strong>
+            </span>
+            <span className="text-zinc-500">•</span>
+            <span className="text-zinc-400">
+              Use top-right menu to switch server
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

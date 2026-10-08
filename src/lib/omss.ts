@@ -356,6 +356,111 @@ export async function getEpisodeSources(
 }
 
 /**
+ * Generates available real streaming mirrors for any movie or TV show by TMDB ID
+ */
+export function getAvailableMediaSources(
+  tmdbId: number,
+  type: "movie" | "tv",
+  season?: number,
+  episode?: number
+): StreamSource[] {
+  const isMovie = type === "movie";
+  const s = season || 1;
+  const ep = episode || 1;
+
+  return [
+    {
+      id: `vidsrc-primary-${tmdbId}`,
+      url: isMovie
+        ? `https://vidsrc.to/embed/movie/${tmdbId}`
+        : `https://vidsrc.to/embed/tv/${tmdbId}/${s}/${ep}`,
+      streamable: true,
+      type: "embed",
+      quality: "1080p",
+      audioTracks: ["Original", "English", "Multi"],
+      provider: {
+        id: "vidsrc-vip",
+        name: "VidSrc Stream (Primary)",
+        latency: 18,
+      },
+    },
+    {
+      id: `superembed-${tmdbId}`,
+      url: isMovie
+        ? `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1`
+        : `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=${s}&e=${ep}`,
+      streamable: true,
+      type: "embed",
+      quality: "1080p",
+      audioTracks: ["English", "Hindi", "Multi"],
+      provider: {
+        id: "superembed",
+        name: "SuperEmbed (Multi-Server)",
+        latency: 24,
+      },
+    },
+    {
+      id: `vidsrc-cc-${tmdbId}`,
+      url: isMovie
+        ? `https://vidsrc.cc/v2/embed/movie/${tmdbId}`
+        : `https://vidsrc.cc/v2/embed/tv/${tmdbId}/${s}/${ep}`,
+      streamable: true,
+      type: "embed",
+      quality: "1080p",
+      audioTracks: ["Original", "English"],
+      provider: {
+        id: "vidsrc-cc",
+        name: "VidSrc CC (Mirror 2)",
+        latency: 32,
+      },
+    },
+    {
+      id: `autoembed-${tmdbId}`,
+      url: isMovie
+        ? `https://player.autoembed.cc/embed/movie/${tmdbId}`
+        : `https://player.autoembed.cc/embed/tv/${tmdbId}/${s}/${ep}`,
+      streamable: true,
+      type: "embed",
+      quality: "1080p",
+      audioTracks: ["English"],
+      provider: {
+        id: "autoembed",
+        name: "AutoEmbed (Fast CDN)",
+        latency: 40,
+      },
+    },
+    {
+      id: `2embed-${tmdbId}`,
+      url: isMovie
+        ? `https://www.2embed.cc/embed/${tmdbId}`
+        : `https://www.2embed.cc/embedtv/${tmdbId}&s=${s}&e=${ep}`,
+      streamable: true,
+      type: "embed",
+      quality: "720p",
+      audioTracks: ["English"],
+      provider: {
+        id: "2embed",
+        name: "2Embed (Backup)",
+        latency: 55,
+      },
+    },
+    {
+      id: `demo-hls-${tmdbId}`,
+      url: "https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8",
+      streamable: true,
+      type: "hls",
+      quality: "1080p",
+      audioTracks: ["English", "Hindi", "Original"],
+      provider: {
+        id: "demo-stream",
+        name: "Offline Demo Stream (HLS)",
+        latency: 12,
+      },
+    },
+  ];
+}
+
+/**
  * Provides verified playback source if OMSS backend is offline so movies always stream
  */
 export function getDemoSampleSources(
@@ -364,12 +469,32 @@ export function getDemoSampleSources(
   season?: number,
   episode?: number
 ): SourceResponse {
+  const sources = getAvailableMediaSources(tmdbId, type, season, episode);
   return {
-    ...DEMO_STREAMS.default,
-    tmdbId,
+    id: `${type}-${tmdbId}-${season || 0}-${episode || 0}`,
     mediaType: type,
+    tmdbId,
     season,
     episode,
-    id: `${type}-${tmdbId}-${season || 0}-${episode || 0}`,
+    expiresAt: new Date(Date.now() + 86400000).toISOString(),
+    status: "ready",
+    sources,
+    subtitles: [
+      {
+        id: "sub-en",
+        url: "/subtitles/en.vtt",
+        label: "English",
+        language: "en",
+        format: "vtt",
+        default: true,
+      },
+      {
+        id: "sub-hi",
+        url: "/subtitles/hi.vtt",
+        label: "Hindi",
+        language: "hi",
+        format: "vtt",
+      },
+    ],
   };
 }

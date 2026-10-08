@@ -4,3 +4,4 @@ import { DetailsSkeleton } from "@/components/skeleton";
 export default function TVDetailsLoading() {
   return <DetailsSkeleton />;
 }
+
