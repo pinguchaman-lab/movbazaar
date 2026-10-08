@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { getTVDetails, getTVSeasonDetails, getTVTrailer } from "@/lib/tmdb";
 import { getEpisodeSources, getDemoSampleSources } from "@/lib/omss";
 import { WatchPlayerContainer } from "@/components/video-player/WatchPlayerContainer";
-import { ArrowLeft, Play, Sparkles } from "lucide-react";
+import { Play, Sparkles } from "lucide-react";
 
 import { Metadata } from "next";
 
@@ -102,23 +102,15 @@ export default async function WatchTVPage({
   return (
     <div className="min-h-screen bg-[#09090b] text-white flex flex-col justify-center items-center px-2 sm:px-6 lg:px-8 py-6">
       <div className="w-full max-w-6xl space-y-4">
-        {/* Navigation Bar Above Player */}
-        <div className="flex items-center justify-between">
-          <Link
-            href={`/tv/${tvShow.id}`}
-            className="inline-flex items-center gap-2 text-xs font-semibold text-zinc-400 hover:text-white transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back to TV Show Details</span>
-          </Link>
-
-          {isDemoActive && (
+        {/* Status Badges Above Player (if any) */}
+        {isDemoActive && (
+          <div className="flex items-center justify-end">
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-700/80 text-zinc-300 text-xs font-medium">
               <Sparkles className="w-3.5 h-3.5 text-[#e50914]" />
               <span>Multi-Mirror Engine</span>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Video Player & Server Selector Container */}
         <WatchPlayerContainer

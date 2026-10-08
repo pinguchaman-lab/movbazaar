@@ -116,7 +116,7 @@ export default function RootLayout({
           <LanguageProvider>
             <Navbar />
             <LoginModal />
-            <main className="flex-1 pt-16 sm:pt-20">{children}</main>
+            <main className="flex-1 pt-14 sm:pt-16">{children}</main>
 
             {/* Official Platform Streaming Footer */}
             <footer className="border-t border-zinc-800/80 bg-zinc-950 text-zinc-400 text-xs py-12 px-4 sm:px-6 lg:px-8 mt-auto select-none">

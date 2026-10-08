@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyVipCredentials, VIP_COOKIE_NAME } from "@/lib/auth";
+import { verifyVipCredentials, signVipToken, VIP_COOKIE_NAME } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,14 +15,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Create session token payload (base64 encoded JSON)
-    const sessionPayload = Buffer.from(
-      JSON.stringify({
-        email: verification.user.email,
-        isVip: true,
-        issuedAt: Date.now(),
-      })
-    ).toString("base64");
+    // Generate tamper-proof cryptographically signed HMAC token
+    const signedToken = signVipToken(verification.user);
 
     const response = NextResponse.json({
       success: true,
@@ -33,7 +27,7 @@ export async function POST(req: NextRequest) {
     // Set secure HTTP-only cookie valid for 30 days
     response.cookies.set({
       name: VIP_COOKIE_NAME,
-      value: sessionPayload,
+      value: signedToken,
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { VIP_COOKIE_NAME, VipUser } from "@/lib/auth";
+import { VIP_COOKIE_NAME, verifyVipToken } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
   const cookie = req.cookies.get(VIP_COOKIE_NAME)?.value;
@@ -8,19 +8,13 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ isVip: false, user: null });
   }
 
-  try {
-    const decoded = JSON.parse(Buffer.from(cookie, "base64").toString("utf-8"));
-    if (decoded && decoded.email && decoded.isVip) {
-      const user: VipUser = {
-        email: decoded.email,
-        isVip: true,
-        plan: "VIP 100% Ad-Free Pass",
-      };
-      return NextResponse.json({ isVip: true, user });
-    }
-  } catch {
-    // Cookie malformed
+  // Cryptographically verifies signature using server HMAC secret
+  const verifiedUser = verifyVipToken(cookie);
+
+  if (verifiedUser) {
+    return NextResponse.json({ isVip: true, user: verifiedUser });
   }
 
+  // Token is expired, invalid, or forged
   return NextResponse.json({ isVip: false, user: null });
 }

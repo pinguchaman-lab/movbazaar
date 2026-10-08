@@ -69,7 +69,7 @@ export function MediaCarousel({
           ref={scrollContainerRef}
           className="flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar scroll-smooth px-4 sm:px-6 lg:px-8 py-2"
         >
-          {items.map((item) => {
+          {items.map((item, idx) => {
             const isTv =
               ("media_type" in item && item.media_type === "tv") ||
               (!("media_type" in item) && defaultType === "tv") ||
@@ -84,7 +84,7 @@ export function MediaCarousel({
 
             return (
               <div
-                key={`${type}-${item.id}`}
+                key={`${type}-${item.id}-${idx}`}
                 className="w-36 sm:w-44 md:w-48 lg:w-52 flex-shrink-0"
               >
                 <MovieCard

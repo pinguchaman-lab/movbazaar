@@ -238,6 +238,14 @@ export function ServerSelectorBar({
           );
         })}
       </div>
+
+      {/* Server Redundancy & Fallback Guidance Notice */}
+      <div className="flex items-start sm:items-center gap-2.5 text-xs text-zinc-300 bg-zinc-950/80 border border-zinc-800 rounded-xl px-3.5 py-2.5 mt-2">
+        <Info className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5 sm:mt-0" />
+        <p className="text-[11px] text-zinc-400 leading-relaxed">
+          <strong className="text-white font-semibold">Playback Tip:</strong> If your chosen server buffers, doesn&apos;t load, or lacks audio, simply select another mirror above (<span className="text-amber-300 font-semibold">Server 2, Server 3, or Server 4</span>) — each server connects to an independent high-speed network.
+        </p>
+      </div>
     </div>
   );
 }

@@ -58,11 +58,12 @@ export function MovieCard({
   };
 
   return (
-    <div className="group relative rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800/80 transition-all duration-300 hover:border-zinc-700 hover:shadow-2xl hover:shadow-black/70 hover:-translate-y-1">
+    <div className="group relative rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800/80 transition-all duration-300 hover:border-zinc-700 hover:shadow-2xl hover:shadow-black/70 hover:-translate-y-1 aspect-[2/3]">
+      {/* Primary Navigation Layer */}
       <Link
         href={href}
         prefetch={true}
-        className="block aspect-[2/3] relative w-full overflow-hidden"
+        className="absolute inset-0 z-0 block w-full h-full overflow-hidden"
       >
         <Image
           src={imgSrc}
@@ -75,7 +76,7 @@ export function MovieCard({
         />
 
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/25 to-transparent opacity-85 group-hover:opacity-95 transition-opacity" />
 
         {/* Upcoming badge top-left if pre-release */}
         {releaseDate && new Date(releaseDate).getTime() > Date.now() && (
@@ -90,41 +91,8 @@ export function MovieCard({
           <span>{voteAverage > 0 ? voteAverage.toFixed(1) : "—"}</span>
         </div>
 
-        {/* Hover Action Buttons */}
-        <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          <Link
-            href={playHref}
-            prefetch={true}
-            onClick={(e) => e.stopPropagation()}
-            className="w-10 h-10 rounded-full bg-[#e50914] text-white flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-transform"
-            title={
-              releaseDate && new Date(releaseDate).getTime() > Date.now()
-                ? "Watch Trailer"
-                : "Watch Now"
-            }
-          >
-            <Play className="w-5 h-5 fill-white ml-0.5" />
-          </Link>
-
-          <button
-            onClick={toggleWatchlist}
-            className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-transform border ${
-              inWatchlist
-                ? "bg-emerald-600 text-white border-emerald-500"
-                : "bg-black/80 text-white border-white/20 hover:bg-zinc-800"
-            }`}
-            title={inWatchlist ? "In Watchlist" : "Add to Watchlist"}
-          >
-            {inWatchlist ? (
-              <Check className="w-5 h-5 stroke-[2.5]" />
-            ) : (
-              <Plus className="w-5 h-5 stroke-[2.5]" />
-            )}
-          </button>
-        </div>
-
         {/* Bottom Details */}
-        <div className="absolute bottom-0 left-0 right-0 p-3">
+        <div className="absolute bottom-0 left-0 right-0 p-3 z-0">
           <div className="text-xs font-semibold text-zinc-100 line-clamp-1 group-hover:text-white transition-colors">
             {title}
           </div>
@@ -136,6 +104,38 @@ export function MovieCard({
           </div>
         </div>
       </Link>
+
+      {/* Hover Action Buttons (Sibling Layer, Not Nested Inside Anchor) */}
+      <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 pointer-events-none">
+        <Link
+          href={playHref}
+          prefetch={true}
+          className="pointer-events-auto w-10 h-10 rounded-full bg-[#e50914] text-white flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-transform"
+          title={
+            releaseDate && new Date(releaseDate).getTime() > Date.now()
+              ? "Watch Trailer"
+              : "Watch Now"
+          }
+        >
+          <Play className="w-5 h-5 fill-white ml-0.5" />
+        </Link>
+
+        <button
+          onClick={toggleWatchlist}
+          className={`pointer-events-auto w-10 h-10 rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-transform border ${
+            inWatchlist
+              ? "bg-emerald-600 text-white border-emerald-500"
+              : "bg-black/80 text-white border-white/20 hover:bg-zinc-800"
+          }`}
+          title={inWatchlist ? "In Watchlist" : "Add to Watchlist"}
+        >
+          {inWatchlist ? (
+            <Check className="w-5 h-5 stroke-[2.5]" />
+          ) : (
+            <Plus className="w-5 h-5 stroke-[2.5]" />
+          )}
+        </button>
+      </div>
     </div>
   );
 }

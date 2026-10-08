@@ -45,12 +45,6 @@ export function LoginModal() {
     }
   };
 
-  const fillDemoCredentials = () => {
-    setEmail("vip@movbazaar.com");
-    setPassword("movbazaar2026");
-    setError(null);
-  };
-
   const handleLogout = async () => {
     await logout();
     closeLoginModal();
@@ -170,18 +164,6 @@ export function LoginModal() {
                 />
                 <Lock className="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
               </div>
-            </div>
-
-            {/* Quick Demo Helper Pill */}
-            <div className="flex items-center justify-between text-xs pt-1">
-              <span className="text-[11px] text-zinc-500">Testing VIP pass?</span>
-              <button
-                type="button"
-                onClick={fillDemoCredentials}
-                className="text-[11px] font-semibold text-amber-400 hover:text-amber-300 underline underline-offset-2 transition-colors"
-              >
-                Auto-Fill Demo VIP Pass
-              </button>
             </div>
 
             {/* Submit Button */}

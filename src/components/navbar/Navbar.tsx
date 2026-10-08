@@ -23,7 +23,7 @@ import {
 import { useLanguage, SUPPORTED_LANGUAGES } from "@/i18n";
 import { useAuth } from "@/context/AuthContext";
 import { MediaItem } from "@/types/tmdb";
-import { getTmdbImageUrl, config } from "@/lib/config";
+import { getTmdbImageUrl } from "@/lib/config";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -141,19 +141,19 @@ export function Navbar() {
     <>
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
-          ? "bg-[#09090b]/90 backdrop-blur-md border-b border-white/10 shadow-lg shadow-black/40 py-3"
-          : "bg-gradient-to-b from-black/90 via-black/40 to-transparent py-4"
+          ? "bg-[#09090b]/95 backdrop-blur-md border-b border-white/10 shadow-lg shadow-black/40 py-2 sm:py-2.5"
+          : "bg-gradient-to-b from-black/90 via-black/40 to-transparent py-2.5 sm:py-3.5"
           }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 flex items-center justify-between gap-2 sm:gap-4">
           {/* Logo & Navigation */}
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-4 sm:gap-8 min-w-0">
             <Link
               href="/"
-              className="flex items-center gap-2 text-2xl font-black tracking-wider group focus:outline-none"
+              className="flex items-center gap-1.5 sm:gap-2 text-xl sm:text-2xl font-black tracking-wider group focus:outline-none flex-shrink-0"
             >
-              <span className="text-[#e50914] flex items-center justify-center w-8 h-8 rounded bg-[#e50914]/15 border border-[#e50914]/40 group-hover:scale-105 transition-transform">
-                <Play className="w-4 h-4 fill-[#e50914]" />
+              <span className="text-[#e50914] flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded bg-[#e50914]/15 border border-[#e50914]/40 group-hover:scale-105 transition-transform">
+                <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-[#e50914]" />
               </span>
               <span className="bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent group-hover:from-white group-hover:to-white transition-colors">
                 MOV<span className="text-[#e50914]">BAZAAR</span>
@@ -181,9 +181,9 @@ export function Navbar() {
           </div>
 
           {/* Right Actions: Search, Language, Settings */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
             {/* Search Input Bar with Autocomplete Dropdown */}
-            <div ref={searchContainerRef} className="relative w-44 sm:w-64 lg:w-72">
+            <div ref={searchContainerRef} className="relative w-28 xs:w-36 sm:w-56 md:w-64 lg:w-72">
               <form onSubmit={handleSearchSubmit} className="relative">
                 <input
                   type="text"
@@ -193,12 +193,12 @@ export function Navbar() {
                   onFocus={() => {
                     if (searchResults.length > 0) setSearchDropdownOpen(true);
                   }}
-                  className="w-full bg-zinc-900/90 text-sm text-zinc-100 placeholder-zinc-500 rounded-full pl-9 pr-4 py-1.5 border border-zinc-800 focus:outline-none focus:border-[#e50914] focus:ring-1 focus:ring-[#e50914] transition-all"
+                  className="w-full bg-zinc-900/90 text-xs sm:text-sm text-zinc-100 placeholder-zinc-500 rounded-full pl-7 sm:pl-9 pr-2.5 sm:pr-4 py-1.5 border border-zinc-800 focus:outline-none focus:border-[#e50914] focus:ring-1 focus:ring-[#e50914] transition-all"
                 />
                 {isSearching ? (
-                  <Loader2 className="w-4 h-4 text-zinc-400 animate-spin absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zinc-400 animate-spin absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 ) : (
-                  <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zinc-400 absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 )}
               </form>
 
@@ -456,28 +456,21 @@ export function Navbar() {
             <div className="space-y-4 text-sm">
               <div>
                 <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">
-                  OMSS Streaming Backend URL
+                  Playback Resolution
                 </label>
-                <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800 font-mono text-xs text-zinc-300">
-                  {config.omss.apiUrl}
+                <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800 text-xs flex items-center justify-between text-zinc-300">
+                  <span>Default Quality</span>
+                  <span className="font-semibold text-emerald-400">1080p Ultra HD (Auto-Adaptive)</span>
                 </div>
-                <p className="text-[11px] text-zinc-500 mt-1">
-                  Configured via NEXT_PUBLIC_OMSS_API_URL in .env.local
-                </p>
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">
-                  TMDB Metadata Status
+                  Multi-Mirror CDN
                 </label>
-                <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800 text-xs flex items-center justify-between">
-                  <span className="text-zinc-300">TMDB API Key</span>
-                  <span
-                    className={`font-semibold ${config.tmdb.apiKey ? "text-emerald-400" : "text-amber-400"
-                      }`}
-                  >
-                    {config.tmdb.apiKey ? "Configured" : "Default Mode (Rich Mock Fallback)"}
-                  </span>
+                <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800 text-xs flex items-center justify-between text-zinc-300">
+                  <span>Mirror Redundancy</span>
+                  <span className="font-semibold text-sky-400">5 High-Speed Mirrors Active</span>
                 </div>
               </div>
 

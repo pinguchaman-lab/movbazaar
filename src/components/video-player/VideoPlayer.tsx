@@ -649,15 +649,20 @@ export function VideoPlayer({
         <div className="absolute inset-0 z-30 bg-black/90 flex items-center justify-center p-6 text-center">
           <div className="max-w-md space-y-4">
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto" />
-            <h3 className="text-lg font-bold text-white">Stream Error</h3>
-            <p className="text-xs text-zinc-400">{playerError}</p>
+            <h3 className="text-lg font-bold text-white">Stream Unreachable</h3>
+            <p className="text-xs text-zinc-300">
+              {playerError}
+            </p>
+            <p className="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-xl p-2.5">
+              Tip: If this server is blocked or buffering, try selecting <strong>Server 2, Server 3, or Server 4</strong> in the server list below.
+            </p>
             <div className="flex justify-center gap-3 pt-2">
               <button
                 onClick={() => setupStream(activeSource)}
                 className="px-4 py-2 bg-[#e50914] text-white text-xs font-bold rounded-lg flex items-center gap-2 hover:bg-[#f40612]"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
-                <span>Retry</span>
+                <span>Retry Stream</span>
               </button>
               <Link
                 href={backUrl}

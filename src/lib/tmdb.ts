@@ -18,7 +18,10 @@ import {
 } from "./tmdb-fallback";
 
 const BASE_URL = config.tmdb.baseUrl;
-const API_KEY = config.tmdb.apiKey;
+const API_KEY =
+  process.env.TMDB_API_KEY ||
+  process.env.NEXT_PUBLIC_TMDB_API_KEY ||
+  "";
 
 const memoryCache = new Map<string, { data: unknown; expiresAt: number }>();
 

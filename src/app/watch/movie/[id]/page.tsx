@@ -1,10 +1,9 @@
 import React from "react";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getMovieDetails, getMovieTrailer } from "@/lib/tmdb";
 import { getMovieSources, getDemoSampleSources } from "@/lib/omss";
 import { WatchPlayerContainer } from "@/components/video-player/WatchPlayerContainer";
-import { ArrowLeft, Sparkles, Calendar } from "lucide-react";
+import { Sparkles, Calendar } from "lucide-react";
 
 import { Metadata } from "next";
 
@@ -80,17 +79,9 @@ export default async function WatchMoviePage({
   return (
     <div className="min-h-screen bg-[#09090b] text-white flex flex-col justify-center items-center px-2 sm:px-6 lg:px-8 py-6">
       <div className="w-full max-w-6xl space-y-4">
-        {/* Navigation Bar Above Player */}
-        <div className="flex items-center justify-between">
-          <Link
-            href={`/movie/${movie.id}`}
-            className="inline-flex items-center gap-2 text-xs font-semibold text-zinc-400 hover:text-white transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back to Movie Details</span>
-          </Link>
-
-          <div className="flex items-center gap-2">
+        {/* Status Badges Above Player (if any) */}
+        {(isUpcoming || isDemoActive) && (
+          <div className="flex items-center justify-end gap-2">
             {isUpcoming && (
               <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-medium">
                 <Calendar className="w-3.5 h-3.5" />
@@ -104,7 +95,7 @@ export default async function WatchMoviePage({
               </div>
             )}
           </div>
-        </div>
+        )}
 
         {/* Video Player & Server Selector Container */}
         <WatchPlayerContainer

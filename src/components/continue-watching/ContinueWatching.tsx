@@ -83,7 +83,7 @@ export function ContinueWatching() {
                     e.stopPropagation();
                     removeItem(item.tmdbId, item.type, item.season, item.episode);
                   }}
-                  className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/60 hover:bg-zinc-800 text-zinc-300 hover:text-white flex items-center justify-center backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-2 right-2 z-10 w-6 h-6 rounded-full bg-black/60 hover:bg-zinc-800 text-zinc-300 hover:text-white flex items-center justify-center backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity"
                   title="Remove from Continue Watching"
                 >
                   <X className="w-3.5 h-3.5" />
