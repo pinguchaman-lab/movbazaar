@@ -8,7 +8,6 @@ import {
   Info,
   Volume2,
   Globe,
-  HelpCircle,
   RefreshCw,
 } from "lucide-react";
 import { StreamSource } from "@/types/omss";
@@ -28,24 +27,22 @@ export function ServerSelectorBar({
   isUpcoming = false,
   originalLanguage,
 }: ServerSelectorBarProps) {
+  const isHindi = originalLanguage === "hi";
+  const isHollywood = originalLanguage === "en";
+  const isSouthIndian = Boolean(
+    originalLanguage && ["te", "ta", "ml", "kn"].includes(originalLanguage)
+  );
+
   const [audioMode, setAudioMode] = useState<"all" | "hindi" | "english">(
-    originalLanguage && ["te", "ta", "ml", "kn", "en"].includes(originalLanguage)
-      ? "hindi"
-      : "all"
+    isHindi ? "hindi" : isHollywood ? "english" : "all"
   );
   const [filter, setFilter] = useState<"all" | "loud" | "fast">("all");
-  const [showDubGuide, setShowDubGuide] = useState(false);
   const [showVolumeGuide, setShowVolumeGuide] = useState(false);
 
   if (!sources || sources.length === 0) return null;
 
   const activeIndex = sources.findIndex((s) => s.id === activeSourceId);
   const activeSource = sources[activeIndex >= 0 ? activeIndex : 0];
-
-  const isSouthIndian = Boolean(
-    originalLanguage && ["te", "ta", "ml", "kn"].includes(originalLanguage)
-  );
-  const isHollywood = originalLanguage === "en";
 
   const handleNextServer = () => {
     if (!sources || sources.length === 0) return;
@@ -80,7 +77,6 @@ export function ServerSelectorBar({
   const handleAudioModeChange = (mode: "all" | "hindi" | "english") => {
     setAudioMode(mode);
     if (mode === "hindi") {
-      setShowDubGuide(true);
       const hindiSource = sources.find(
         (s) =>
           s.id.includes("autoembed") ||
@@ -236,10 +232,7 @@ export function ServerSelectorBar({
           </div>
 
           <button
-            onClick={() => {
-              setShowVolumeGuide(!showVolumeGuide);
-              if (showDubGuide) setShowDubGuide(false);
-            }}
+            onClick={() => setShowVolumeGuide(!showVolumeGuide)}
             className={`px-2 py-1 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors border ${
               showVolumeGuide
                 ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
@@ -250,119 +243,100 @@ export function ServerSelectorBar({
             <Volume2 className="w-3.5 h-3.5 text-amber-400" />
             <span className="text-[11px] hidden sm:inline">Low Sound?</span>
           </button>
-
-          <button
-            onClick={() => {
-              setShowDubGuide(!showDubGuide);
-              if (showVolumeGuide) setShowVolumeGuide(false);
-            }}
-            className={`p-1.5 rounded-xl text-zinc-300 hover:text-white transition-colors border ${
-              showDubGuide
-                ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
-                : "bg-zinc-800/80 hover:bg-zinc-700/80 border-zinc-700/60"
-            }`}
-            title="How Multi-Audio & Hindi Dubbing Works"
-          >
-            <HelpCircle className="w-4 h-4 text-amber-400" />
-          </button>
         </div>
       </div>
 
-      {/* Prominent Audio Language Mode Switcher Bar */}
+      {/* Audio Language Information Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl bg-zinc-950/90 border border-zinc-800">
         <div className="space-y-0.5">
           <div className="flex items-center gap-2">
             <Globe className="w-4 h-4 text-[#e50914]" />
             <span className="text-xs font-bold text-white uppercase tracking-wider">
-              Audio Language Selection:
+              Audio Soundtrack:
             </span>
           </div>
           <p className="text-[11px] text-zinc-400">
-            Switch between Hindi Dubbed or Original English / South Indian audio instantly
+            {isHindi
+              ? "Indian Cinema / Series — 100% Native Hindi dialogue audio"
+              : isHollywood
+              ? "Hollywood Release — Original Studio English with Multi-Language Subtitles (CC)"
+              : `International Release — ${getLangName(originalLanguage)} Original Audio`}
           </p>
         </div>
 
         <div className="flex items-center gap-1.5 bg-zinc-900/90 p-1 rounded-xl border border-zinc-800 self-start sm:self-auto flex-wrap">
-          <button
-            onClick={() => handleAudioModeChange("hindi")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
-              audioMode === "hindi"
-                ? "bg-gradient-to-r from-amber-600 to-red-600 text-white shadow-lg shadow-red-950/60 ring-1 ring-amber-400"
-                : "text-zinc-400 hover:text-white hover:bg-zinc-800/60"
-            }`}
-          >
-            <span>🇮🇳 Hindi Dubbed (हिंदी)</span>
-          </button>
-          <button
-            onClick={() => handleAudioModeChange("english")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
-              audioMode === "english"
-                ? "bg-gradient-to-r from-sky-600 to-indigo-600 text-white shadow-lg shadow-sky-950/60 ring-1 ring-sky-400"
-                : "text-zinc-400 hover:text-white hover:bg-zinc-800/60"
-            }`}
-          >
-            <span>🌐 English / Original</span>
-          </button>
-          <button
-            onClick={() => handleAudioModeChange("all")}
-            className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-              audioMode === "all"
-                ? "bg-zinc-800 text-white"
-                : "text-zinc-400 hover:text-white hover:bg-zinc-800/60"
-            }`}
-          >
-            <span>All Mirrors ({sources.length})</span>
-          </button>
+          {isHindi ? (
+            <div className="px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-amber-600 to-red-600 text-white shadow-lg shadow-red-950/60 ring-1 ring-amber-400 flex items-center gap-1.5">
+              <span>🇮🇳 Native Hindi Audio</span>
+            </div>
+          ) : isHollywood ? (
+            <>
+              <div className="px-3 py-1.5 rounded-lg text-xs font-bold bg-sky-950/80 text-sky-200 border border-sky-600/50 flex items-center gap-1.5">
+                <Globe className="w-3.5 h-3.5 text-sky-400" />
+                <span>🌐 English (Original Audio)</span>
+              </div>
+              <div className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-zinc-800 text-zinc-300">
+                <span>💬 Subtitles (CC in Player)</span>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="px-3 py-1.5 rounded-lg text-xs font-bold bg-purple-950/80 text-purple-200 border border-purple-600/50">
+                <span>{getLangName(originalLanguage)} (Original)</span>
+              </div>
+              <button
+                onClick={() => handleAudioModeChange("all")}
+                className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white"
+              >
+                <span>All Mirrors ({sources.length})</span>
+              </button>
+            </>
+          )}
         </div>
       </div>
 
-      {/* Regional Context Banner (South Indian / Hollywood) */}
+      {/* Hollywood Title Context Notice */}
+      {isHollywood && (
+        <div className="p-3 rounded-xl bg-sky-950/30 border border-sky-800/40 text-sky-200 text-xs flex items-start gap-2.5">
+          <Globe className="w-4 h-4 text-sky-400 flex-shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <div className="font-bold text-sky-300 flex items-center gap-1.5">
+              <span>Hollywood International Title: Original English Sound</span>
+            </div>
+            <p className="text-[11px] text-zinc-300 leading-relaxed">
+              This film streams in its <strong>original studio English master</strong> with crystal-clear audio. To read subtitles, click the <strong>CC / Subtitles icon</strong> inside the video player. Free third-party streaming CDNs provide original English masters for international cinema and do not offer secondary in-player Hindi audio dubbing.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Hindi Native Notice */}
+      {isHindi && (
+        <div className="p-3 rounded-xl bg-amber-950/30 border border-amber-800/40 text-amber-200 text-xs flex items-start gap-2.5">
+          <Sparkles className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <div className="font-bold text-amber-300">
+              Indian Cinema &amp; Series: 100% Hindi Audio
+            </div>
+            <p className="text-[11px] text-zinc-300 leading-relaxed">
+              All servers stream this title natively in <strong>Hindi dialogue</strong> with full audio fidelity across all available mirrors.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* South Indian Context Notice */}
       {isSouthIndian && (
         <div className="p-3 rounded-xl bg-orange-950/30 border border-orange-800/40 text-orange-200 text-xs flex items-start gap-2.5">
           <Sparkles className="w-4 h-4 text-orange-400 flex-shrink-0 mt-0.5" />
           <div className="space-y-1">
             <div className="font-bold text-orange-300 flex items-center gap-1.5 flex-wrap">
               <span>South Indian Film: {getLangName(originalLanguage)}</span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/30">
-                Hindi Dubbed Available
-              </span>
             </div>
             <p className="text-[11px] text-zinc-300 leading-relaxed">
-              This movie was originally filmed in {getLangName(originalLanguage)}. To watch the <strong>Hindi Dubbed</strong> version, select <strong>Hindi Dubbed (हिंदी)</strong> above — <strong>Server 1 (AutoEmbed)</strong> and <strong>Server 2 (VidLink)</strong> provide official Indian theatrical dubbing feeds!
+              This title was originally filmed in {getLangName(originalLanguage)}. Servers provide high-definition streaming with subtitles. If a server indexes an Indian dubbed release, it will be loaded automatically.
             </p>
           </div>
-        </div>
-      )}
-
-      {isHollywood && (
-        <div className="p-3 rounded-xl bg-sky-950/30 border border-sky-800/40 text-sky-200 text-xs flex items-start gap-2.5">
-          <Globe className="w-4 h-4 text-sky-400 flex-shrink-0 mt-0.5" />
-          <div className="space-y-1">
-            <div className="font-bold text-sky-300 flex items-center gap-1.5">
-              <span>Hollywood International Title — Dual Audio</span>
-            </div>
-            <p className="text-[11px] text-zinc-300 leading-relaxed">
-              Choose <strong>Hindi Dubbed (हिंदी)</strong> for Indian voiceover (Server 1 &amp; Server 2) or <strong>English / Original</strong> for pristine studio audio with subtitles.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Hindi Dubbing In-Player Switching Guide Banner */}
-      {(showDubGuide || audioMode === "hindi") && (
-        <div className="p-3.5 rounded-xl bg-amber-950/30 border border-amber-800/40 text-amber-200 text-xs space-y-1.5 animate-in fade-in duration-200">
-          <div className="flex items-center gap-2 font-bold text-amber-300">
-            <Volume2 className="w-4 h-4 text-amber-400" />
-            <span>How to switch audio track inside the video screen:</span>
-          </div>
-          <ul className="list-disc list-inside space-y-1 text-[11px] text-zinc-300 pl-1 leading-relaxed">
-            <li>
-              <strong>Inside Video Player:</strong> In <strong>Server 1 (AutoEmbed)</strong> or <strong>Server 2 (VidLink)</strong>, click the <strong>Settings (⚙️) / Audio Track</strong> icon inside the video frame and select <strong>&quot;Hindi&quot;</strong> or <strong>&quot;Dual Audio&quot;</strong> if it does not start automatically.
-            </li>
-            <li>
-              <strong>Alternate Dub Mirrors:</strong> If Server 1 shows &quot;Not Found&quot; or buffers, click <strong>&quot;Server Not Working? Try Next&quot;</strong> above or select <strong>Server 2 (VidLink)</strong>, <strong>Server 3 (VidSrc PM)</strong>, or <strong>Server 9 (VidCore)</strong> below.
-            </li>
-          </ul>
         </div>
       )}
 
@@ -379,9 +353,6 @@ export function ServerSelectorBar({
             </li>
             <li>
               <strong>Switch to High-Gain Servers:</strong> Some servers stream raw 5.1 cinema surround sound where vocal dialogue is quiet on laptop/mobile speakers. Select <strong className="text-amber-300">Server 1 (AutoEmbed)</strong> or <strong className="text-emerald-300">Server 2 (VidLink)</strong> for loud stereo mastered audio.
-            </li>
-            <li>
-              <strong>Change Audio Track:</strong> Inside Server 2 or Server 3 settings (gear icon inside video), switching audio tracks (e.g. Stereo, Dual Audio, or English Stereo) provides amplified dialogue.
             </li>
             <li>
               <strong>Native Player Booster:</strong> When watching via direct stream, press <strong className="text-amber-300">B</strong> or click the <strong className="text-amber-300">Boost (150% - 300%)</strong> button next to the volume slider to amplify quiet audio.
@@ -413,24 +384,7 @@ export function ServerSelectorBar({
           const providerName = s.provider?.name || `Server ${idx + 1}`;
           const quality = s.quality || "1080p";
           const isTrailer = s.id.includes("trailer");
-          const hasHindi =
-            s.audioTracks?.includes("Hindi") ||
-            s.id.includes("multiembed") ||
-            s.id.includes("autoembed") ||
-            s.id.includes("vidlink") ||
-            s.id.includes("vidcore");
-          const isOriginal =
-            s.id.includes("vidsrc-pm") ||
-            s.id.includes("vidsrc-su") ||
-            s.id.includes("2embed") ||
-            s.id.includes("vidfast") ||
-            s.id.includes("vidsrc-ru");
-          const hasMulti =
-            s.audioTracks?.includes("Multi") ||
-            s.id.includes("vidlink") ||
-            s.id.includes("autoembed") ||
-            s.id.includes("vidcore") ||
-            s.id.includes("vidsrc-pm");
+          const isNativeHls = s.type === "hls";
           const isHighUptime =
             s.id.includes("autoembed") || s.id.includes("vidsrc-pm");
 
@@ -486,21 +440,21 @@ export function ServerSelectorBar({
                   </span>
                 )}
 
-                {hasHindi ? (
+                {isHindi ? (
                   <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/25 text-amber-300 border border-amber-500/30">
                     🇮🇳 Hindi
                   </span>
-                ) : isOriginal ? (
+                ) : isHollywood ? (
                   <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-sky-500/20 text-sky-300 border border-sky-500/30">
-                    🌐 Original
+                    🌐 English + CC
                   </span>
-                ) : hasMulti ? (
-                  <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                    Multi
+                ) : isNativeHls ? (
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    Multi-Track
                   </span>
                 ) : (
-                  <span className="text-[9px] capitalize text-zinc-400">
-                    {s.type === "embed" ? "Fast Embed" : "HLS Direct"}
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                    {getLangName(originalLanguage)}
                   </span>
                 )}
               </div>

@@ -67,6 +67,7 @@ export function WatchPlayerContainer({
         initialTime={initialTime}
         activeSourceId={activeSourceId}
         onSourceChange={(s) => setActiveSourceId(s.id)}
+        originalLanguage={originalLanguage}
       />
 
       {/* Dedicated Server Switcher Bar directly below player */}

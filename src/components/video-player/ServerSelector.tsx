@@ -93,13 +93,9 @@ export function ServerSelector({
                   <div className="min-w-0 pr-2">
                     <div className="flex items-center gap-1.5 truncate">
                       <span className="truncate">{providerName}</span>
-                      {(s.id.includes("multiembed") ||
-                        s.id.includes("autoembed") ||
-                        s.id.includes("vidlink") ||
-                        s.id.includes("vidcore") ||
-                        s.audioTracks?.includes("Hindi")) && (
+                      {s.type === "hls" && (
                         <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[8px] font-bold">
-                          Dual Audio
+                          Multi-Audio
                         </span>
                       )}
                       {(s.id.includes("autoembed") || s.id.includes("vidsrc-pm")) && (

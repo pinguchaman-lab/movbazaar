@@ -44,6 +44,7 @@ interface VideoPlayerProps {
   initialTime?: number;
   activeSourceId?: string;
   onSourceChange?: (source: StreamSource) => void;
+  originalLanguage?: string;
 }
 
 export function VideoPlayer({
@@ -63,6 +64,7 @@ export function VideoPlayer({
   initialTime = 0,
   activeSourceId,
   onSourceChange,
+  originalLanguage,
 }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -833,15 +835,21 @@ export function VideoPlayer({
             </div>
           </div>
 
-          {/* Server Switcher & Audio Tip on Header */}
+          {/* Server Switcher & Audio Information on Header */}
           <div className="flex items-center gap-2">
             {activeSource.type === "embed" && (
               <div
-                className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-black/60 backdrop-blur-md border border-white/10 text-[11px] text-zinc-300"
-                title="Low audio? Switch to Server 1 or ensure in-video volume is 100%"
+                className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-black/70 backdrop-blur-md border border-white/10 text-[11px] text-zinc-300"
+                title="Stream Audio Language"
               >
                 <Volume2 className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
-                <span>Low audio? Try Server 1 or 4</span>
+                <span>
+                  {originalLanguage === "hi"
+                    ? "Audio: Hindi (Native)"
+                    : originalLanguage === "en"
+                    ? "Audio: English (Original) • CC in Player"
+                    : "Audio: Original Soundtrack"}
+                </span>
               </div>
             )}
             <ServerSelector
