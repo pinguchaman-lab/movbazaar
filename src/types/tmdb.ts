@@ -9,6 +9,7 @@ export interface TMDBGenre {
 
 export interface TMDBMovie {
   id: number;
+  imdb_id?: string | null;
   title: string;
   original_title: string;
   original_language?: string;
@@ -33,6 +34,7 @@ export interface TMDBMovie {
 
 export interface TMDBTVShow {
   id: number;
+  imdb_id?: string | null;
   name: string;
   original_name: string;
   original_language?: string;

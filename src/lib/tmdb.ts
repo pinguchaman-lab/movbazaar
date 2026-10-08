@@ -523,6 +523,14 @@ export async function getTVDetails(id: number): Promise<TMDBTVShow | null> {
   return fallback || null;
 }
 
+export async function getTVExternalIds(id: number): Promise<{ imdb_id?: string } | null> {
+  const data = await tmdbFetch<{ imdb_id?: string }>(`/tv/${id}/external_ids`);
+  if (data?.imdb_id) return data;
+  const fallback = FALLBACK_TV_SHOWS.find((t) => t.id === id);
+  if (fallback?.imdb_id) return { imdb_id: fallback.imdb_id };
+  return null;
+}
+
 export async function getTVSeasonDetails(
   id: number,
   seasonNumber: number

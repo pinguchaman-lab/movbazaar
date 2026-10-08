@@ -1,7 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
-import { Server, Sparkles, Check, Info, Volume2, Globe, HelpCircle } from "lucide-react";
+import {
+  Server,
+  Sparkles,
+  Check,
+  Info,
+  Volume2,
+  Globe,
+  HelpCircle,
+  RefreshCw,
+} from "lucide-react";
 import { StreamSource } from "@/types/omss";
 
 interface ServerSelectorBarProps {
@@ -38,6 +47,13 @@ export function ServerSelectorBar({
   );
   const isHollywood = originalLanguage === "en";
 
+  const handleNextServer = () => {
+    if (!sources || sources.length === 0) return;
+    const currentIdx = sources.findIndex((s) => s.id === activeSourceId);
+    const nextIdx = (currentIdx + 1) % sources.length;
+    onSelectSource(sources[nextIdx]);
+  };
+
   const getLangName = (code?: string) => {
     switch (code) {
       case "te":
@@ -68,12 +84,9 @@ export function ServerSelectorBar({
       const hindiSource = sources.find(
         (s) =>
           s.id.includes("multiembed") ||
-          s.id.includes("vidlink") ||
-          s.id.includes("superembed") ||
-          s.id.includes("smashystream") ||
-          s.id.includes("moviesapi") ||
           s.id.includes("autoembed") ||
-          s.id.includes("vidsrc-cc") ||
+          s.id.includes("vidlink") ||
+          s.id.includes("vidcore") ||
           s.audioTracks?.includes("Hindi") ||
           s.audioTracks?.includes("Multi")
       );
@@ -83,9 +96,10 @@ export function ServerSelectorBar({
     } else if (mode === "english") {
       const origSource = sources.find(
         (s) =>
+          s.id.includes("autoembed") ||
           s.id.includes("vidsrc-pm") ||
           s.id.includes("vidsrc-su") ||
-          s.id.includes("embedsu") ||
+          s.id.includes("vidcore") ||
           s.id.includes("2embed") ||
           s.id.includes("vidlink")
       );
@@ -100,21 +114,22 @@ export function ServerSelectorBar({
     if (audioMode === "hindi") {
       const isDualAudio =
         s.id.includes("multiembed") ||
-        s.id.includes("vidlink") ||
-        s.id.includes("superembed") ||
-        s.id.includes("smashystream") ||
-        s.id.includes("moviesapi") ||
         s.id.includes("autoembed") ||
-        s.id.includes("vidsrc-cc") ||
+        s.id.includes("vidlink") ||
+        s.id.includes("vidcore") ||
         s.audioTracks?.includes("Hindi") ||
         s.audioTracks?.includes("Multi");
       if (!isDualAudio) return false;
     } else if (audioMode === "english") {
       const isOriginal =
+        s.id.includes("autoembed") ||
         s.id.includes("vidsrc-pm") ||
         s.id.includes("vidsrc-su") ||
-        s.id.includes("embedsu") ||
+        s.id.includes("vidcore") ||
         s.id.includes("2embed") ||
+        s.id.includes("2embed-skin") ||
+        s.id.includes("vidfast") ||
+        s.id.includes("vidsrc-ru") ||
         s.id.includes("vidlink") ||
         s.audioTracks?.includes("Original") ||
         s.audioTracks?.includes("English");
@@ -123,21 +138,20 @@ export function ServerSelectorBar({
 
     if (filter === "fast") {
       return (
+        s.id.includes("autoembed") ||
         s.id.includes("vidlink") ||
-        s.id.includes("superembed") ||
-        s.id.includes("moviesapi") ||
-        s.id.includes("embedsu") ||
+        s.id.includes("vidcore") ||
         s.id.includes("vidsrc-pm") ||
         s.id.includes("vidsrc-su") ||
-        s.id.includes("multiembed") ||
-        s.id.includes("autoembed")
+        s.id.includes("2embed") ||
+        s.id.includes("multiembed")
       );
     }
     if (filter === "loud") {
       return (
-        s.id.includes("vidlink") ||
-        s.id.includes("superembed") ||
         s.id.includes("autoembed") ||
+        s.id.includes("vidlink") ||
+        s.id.includes("vidcore") ||
         s.id.includes("multiembed") ||
         s.type === "hls"
       );
@@ -168,8 +182,18 @@ export function ServerSelectorBar({
           </div>
         </div>
 
-        {/* Active Server Pill & Quick Filters */}
+        {/* Active Server Pill, Quick Switcher & Quick Filters */}
         <div className="flex items-center gap-2 flex-wrap">
+          {/* Quick-Switch Button: cycles to next mirror immediately */}
+          <button
+            onClick={handleNextServer}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-red-600 via-amber-600 to-red-600 hover:from-red-500 hover:to-amber-500 text-white text-[11px] sm:text-xs font-bold shadow-md hover:shadow-red-600/30 transition-all active:scale-95 group cursor-pointer"
+            title="If this server shows 'Not Found' or fails, click to switch to the next live mirror"
+          >
+            <RefreshCw className="w-3.5 h-3.5 group-hover:rotate-180 transition-transform duration-500" />
+            <span>Server Not Working? Try Next</span>
+          </button>
+
           <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-zinc-950/70 border border-zinc-800 text-[11px] text-zinc-300">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             <span className="text-zinc-400">Active:</span>
@@ -306,7 +330,7 @@ export function ServerSelectorBar({
               </span>
             </div>
             <p className="text-[11px] text-zinc-300 leading-relaxed">
-              This movie was originally filmed in {getLangName(originalLanguage)}. To watch the <strong>Hindi Dubbed</strong> version, select <strong>Hindi Dubbed (हिंदी)</strong> above — <strong>Server 1 (MultiEmbed)</strong> and <strong>Server 2 (VidLink)</strong> provide the official Hindi theatrical dubbing!
+              This movie was originally filmed in {getLangName(originalLanguage)}. To watch the <strong>Hindi Dubbed</strong> version, select <strong>Hindi Dubbed (हिंदी)</strong> above — <strong>Server 1 (MultiEmbed)</strong>, <strong>Server 2 (AutoEmbed)</strong>, and <strong>Server 3 (VidLink)</strong> provide official Indian theatrical dubbing feeds!
             </p>
           </div>
         </div>
@@ -335,10 +359,10 @@ export function ServerSelectorBar({
           </div>
           <ul className="list-disc list-inside space-y-1 text-[11px] text-zinc-300 pl-1 leading-relaxed">
             <li>
-              <strong>Inside Video Player:</strong> In <strong>Server 1 (MultiEmbed)</strong> or <strong>Server 2 (VidLink)</strong>, click the <strong>Settings (⚙️) / Audio Track</strong> icon inside the video frame and select <strong>&quot;Hindi&quot;</strong> or <strong>&quot;Dual Audio&quot;</strong> if it does not start automatically.
+              <strong>Inside Video Player:</strong> In <strong>Server 1 (MultiEmbed)</strong>, <strong>Server 2 (AutoEmbed)</strong>, or <strong>Server 3 (VidLink)</strong>, click the <strong>Settings (⚙️) / Audio Track</strong> icon inside the video frame and select <strong>&quot;Hindi&quot;</strong> or <strong>&quot;Dual Audio&quot;</strong> if it does not start automatically.
             </li>
             <li>
-              <strong>Alternate Dub Mirrors:</strong> If Server 1 plays in original sound or buffers, select <strong>Server 2 (VidLink)</strong>, <strong>Server 3 (SmashyStream)</strong>, or <strong>Server 4 (AutoEmbed)</strong> below — each mirror is loaded with different audio feeds.
+              <strong>Alternate Dub Mirrors:</strong> If Server 1 shows &quot;Not Found&quot; or buffers, click <strong>&quot;Server Not Working? Try Next&quot;</strong> above or select <strong>Server 2 (AutoEmbed)</strong>, <strong>Server 3 (VidLink)</strong>, or <strong>Server 4 (VidCore)</strong> below — each mirror is loaded with different audio feeds.
             </li>
           </ul>
         </div>
@@ -356,10 +380,10 @@ export function ServerSelectorBar({
               <strong>Internal Player Slider:</strong> Embedded players inside the video window often default to 50% volume. Hover or tap the video player, find the speaker slider next to the play button, and drag it to 100%.
             </li>
             <li>
-              <strong>Switch to High-Gain Servers:</strong> Some servers stream raw 5.1 cinema surround sound where vocal dialogue is quiet on laptop/mobile speakers. Select <strong className="text-amber-300">Server 2 (VidLink)</strong> or <strong className="text-emerald-300">Server 4 (AutoEmbed)</strong> for loud stereo mastered audio.
+              <strong>Switch to High-Gain Servers:</strong> Some servers stream raw 5.1 cinema surround sound where vocal dialogue is quiet on laptop/mobile speakers. Select <strong className="text-amber-300">Server 2 (AutoEmbed)</strong> or <strong className="text-emerald-300">Server 4 (VidCore)</strong> for loud stereo mastered audio.
             </li>
             <li>
-              <strong>Change Audio Track:</strong> Inside Server 2&apos;s settings (gear icon inside video), switching audio tracks (e.g. Stereo, Dual Audio, or English Stereo) provides amplified dialogue.
+              <strong>Change Audio Track:</strong> Inside Server 2 or Server 3 settings (gear icon inside video), switching audio tracks (e.g. Stereo, Dual Audio, or English Stereo) provides amplified dialogue.
             </li>
             <li>
               <strong>Native Player Booster:</strong> When watching via direct stream, press <strong className="text-amber-300">B</strong> or click the <strong className="text-amber-300">Boost (150% - 300%)</strong> button next to the volume slider to amplify quiet audio.
@@ -394,18 +418,23 @@ export function ServerSelectorBar({
           const hasHindi =
             s.audioTracks?.includes("Hindi") ||
             s.id.includes("multiembed") ||
-            s.id.includes("vidlink") ||
-            s.id.includes("smashystream") ||
             s.id.includes("autoembed") ||
-            s.id.includes("vidsrc-cc");
+            s.id.includes("vidlink") ||
+            s.id.includes("vidcore");
           const isOriginal =
             s.id.includes("vidsrc-pm") ||
             s.id.includes("vidsrc-su") ||
-            s.id.includes("2embed");
+            s.id.includes("2embed") ||
+            s.id.includes("vidfast") ||
+            s.id.includes("vidsrc-ru");
           const hasMulti =
             s.audioTracks?.includes("Multi") ||
             s.id.includes("vidlink") ||
+            s.id.includes("autoembed") ||
+            s.id.includes("vidcore") ||
             s.id.includes("vidsrc-pm");
+          const isHighUptime =
+            s.id.includes("autoembed") || s.id.includes("vidsrc-pm");
 
           return (
             <button
@@ -442,7 +471,7 @@ export function ServerSelectorBar({
               </div>
 
               {/* Audio & Quality Tags */}
-              <div className="flex items-center justify-between gap-1 text-[10px] font-mono opacity-85 pt-0.5">
+              <div className="flex items-center justify-between gap-1 text-[10px] font-mono opacity-85 pt-0.5 flex-wrap">
                 <span
                   className={`px-1.5 py-0.5 rounded text-[9px] font-semibold ${
                     isSelected
@@ -453,9 +482,15 @@ export function ServerSelectorBar({
                   {quality}
                 </span>
 
+                {isHighUptime && (
+                  <span className="px-1.5 py-0.5 rounded text-[8px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    🟢 99.9%
+                  </span>
+                )}
+
                 {hasHindi ? (
                   <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/25 text-amber-300 border border-amber-500/30">
-                    🇮🇳 Hindi Dub
+                    🇮🇳 Hindi
                   </span>
                 ) : isOriginal ? (
                   <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-sky-500/20 text-sky-300 border border-sky-500/30">
@@ -480,7 +515,7 @@ export function ServerSelectorBar({
       <div className="flex items-start sm:items-center gap-2.5 text-xs text-zinc-300 bg-zinc-950/80 border border-zinc-800 rounded-xl px-3.5 py-2.5 mt-2">
         <Info className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5 sm:mt-0" />
         <p className="text-[11px] text-zinc-400 leading-relaxed">
-          <strong className="text-white font-semibold">Playback &amp; Audio Tip:</strong> If your chosen server buffers, has low volume, or lacks audio, simply select another mirror above (<span className="text-amber-300 font-semibold">Server 1 or Server 4</span> for loudest audio) — each server connects to an independent high-speed network.
+          <strong className="text-white font-semibold">Playback &amp; Audio Tip:</strong> If any server displays &quot;Not Found&quot; or buffers, click <span className="text-amber-300 font-semibold">&quot;Server Not Working? Try Next&quot;</span> above or select any mirror (<span className="text-amber-300 font-semibold">Server 1, 2, 3, or 4</span>) — all 10 servers run on separate global high-speed CDN networks.
         </p>
       </div>
     </div>

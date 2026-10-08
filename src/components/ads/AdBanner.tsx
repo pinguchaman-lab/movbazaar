@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Sparkles, Zap, ArrowRight, Lock } from "lucide-react";
 

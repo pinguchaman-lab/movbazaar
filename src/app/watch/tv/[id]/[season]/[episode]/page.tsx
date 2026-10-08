@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getTVDetails, getTVSeasonDetails, getTVTrailer } from "@/lib/tmdb";
+import { getTVDetails, getTVSeasonDetails, getTVTrailer, getTVExternalIds } from "@/lib/tmdb";
 import { getEpisodeSources, getDemoSampleSources } from "@/lib/omss";
 import { WatchPlayerContainer } from "@/components/video-player/WatchPlayerContainer";
 import { EpisodeList } from "@/components/episode-list/EpisodeList";
@@ -50,16 +50,21 @@ export default async function WatchTVPage({
   const initialTime = searchParams.t ? parseInt(searchParams.t, 10) : 0;
   const isDemoRequested = searchParams.demo === "true";
 
-  const [tvShow, seasonDetail, trailerKey] = await Promise.all([
+  const [tvShow, seasonDetail, trailerKey, externalIds] = await Promise.all([
     getTVDetails(tvId),
     getTVSeasonDetails(tvId, seasonNum),
     getTVTrailer(tvId),
+    getTVExternalIds(tvId),
   ]);
 
   if (!tvShow) notFound();
 
+  const imdbId = externalIds?.imdb_id || tvShow.imdb_id;
+
   const omssResult = await getEpisodeSources(tvId, seasonNum, episodeNum, {
     trailerKey,
+    imdbId,
+    title: tvShow.name,
   });
 
   const currentEp = seasonDetail?.episodes?.find(
@@ -89,6 +94,8 @@ export default async function WatchTVPage({
       ? omssResult.data.sources
       : getDemoSampleSources(tvId, "tv", seasonNum, episodeNum, {
           trailerKey,
+          imdbId,
+          title: tvShow.name,
         }).sources;
 
   const finalSubtitles =

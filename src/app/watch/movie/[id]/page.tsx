@@ -55,6 +55,8 @@ export default async function WatchMoviePage({
   const omssResult = await getMovieSources(movieId, {
     trailerKey,
     isUpcoming,
+    imdbId: movie.imdb_id,
+    title: movie.title,
   });
 
   // If OMSS result has sources, use them; otherwise ensure fallback stream
@@ -64,6 +66,8 @@ export default async function WatchMoviePage({
       : getDemoSampleSources(movieId, "movie", undefined, undefined, {
           trailerKey,
           isUpcoming,
+          imdbId: movie.imdb_id,
+          title: movie.title,
         }).sources;
 
   const finalSubtitles =
