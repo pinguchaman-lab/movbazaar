@@ -6,6 +6,8 @@ import { getMovieSources, getDemoSampleSources } from "@/lib/omss";
 import { WatchPlayerContainer } from "@/components/video-player/WatchPlayerContainer";
 import { ArrowLeft, Sparkles, Calendar } from "lucide-react";
 
+import { Metadata } from "next";
+
 interface WatchMoviePageProps {
   params: {
     id: string;
@@ -17,6 +19,18 @@ interface WatchMoviePageProps {
 }
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }: WatchMoviePageProps): Promise<Metadata> {
+  const movieId = parseInt(params.id, 10);
+  if (isNaN(movieId)) return { title: "Watch Movie | MovBazaar" };
+
+  const movie = await getMovieDetails(movieId);
+  const title = movie ? `Now Streaming: ${movie.title} in 1080p | MovBazaar` : "Watch Movie | MovBazaar";
+  return {
+    title,
+    description: `Watch ${movie?.title || "Movie"} full streaming with Dual Audio and subtitles on MovBazaar.`,
+  };
+}
 
 export default async function WatchMoviePage({
   params,

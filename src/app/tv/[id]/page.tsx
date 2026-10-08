@@ -9,6 +9,8 @@ import { EpisodeList } from "@/components/episode-list/EpisodeList";
 import { OMSSAvailabilityBadge } from "@/components/omss-badge/OMSSAvailabilityBadge";
 import { WatchlistButton } from "@/components/details/WatchlistButton";
 
+import { Metadata } from "next";
+
 interface TVPageProps {
   params: {
     id: string;
@@ -16,6 +18,43 @@ interface TVPageProps {
 }
 
 export const revalidate = 3600;
+
+export async function generateMetadata({ params }: TVPageProps): Promise<Metadata> {
+  const tvId = parseInt(params.id, 10);
+  if (isNaN(tvId)) return { title: "TV Show Not Found | MovBazaar" };
+
+  const tvShow = await getTVDetails(tvId);
+  if (!tvShow) return { title: "TV Show Not Found | MovBazaar" };
+
+  const year = tvShow.first_air_date ? new Date(tvShow.first_air_date).getFullYear() : "";
+  const title = `Watch ${tvShow.name} ${year ? `(${year})` : ""} All Seasons & Episodes Free in HD`;
+  const description = `Stream all seasons and episodes of ${tvShow.name} in Ultra HD 1080p with Dual Audio tracks, subtitles, and fast servers on MovBazaar. ${tvShow.overview ? tvShow.overview.slice(0, 140) + "..." : ""}`;
+  const posterUrl = getTmdbImageUrl(tvShow.poster_path, "w500");
+  const backdropUrl = getTmdbImageUrl(tvShow.backdrop_path, "original");
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [
+        {
+          url: backdropUrl || posterUrl || "/og-image.png",
+          width: 1200,
+          height: 630,
+          alt: tvShow.name,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [backdropUrl || posterUrl || "/og-image.png"],
+    },
+  };
+}
 
 export default async function TVDetailsPage({ params }: TVPageProps) {
   const tvId = parseInt(params.id, 10);
@@ -34,8 +73,31 @@ export default async function TVDetailsPage({ params }: TVPageProps) {
     ? new Date(tvShow.first_air_date).getFullYear()
     : "";
 
+  const tvJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "TVSeries",
+    name: tvShow.name,
+    description: tvShow.overview,
+    image: getTmdbImageUrl(tvShow.poster_path, "w500"),
+    startDate: tvShow.first_air_date,
+    numberOfSeasons: tvShow.number_of_seasons || 1,
+    numberOfEpisodes: tvShow.number_of_episodes || 10,
+    aggregateRating: tvShow.vote_average
+      ? {
+          "@type": "AggregateRating",
+          ratingValue: tvShow.vote_average.toFixed(1),
+          bestRating: "10",
+          ratingCount: tvShow.vote_count || 100,
+        }
+      : undefined,
+  };
+
   return (
     <div className="min-h-screen pb-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(tvJsonLd) }}
+      />
       {/* Backdrop Banner */}
       <div className="relative w-full h-[45vh] sm:h-[55vh] max-h-[500px] overflow-hidden bg-zinc-950">
         <Image

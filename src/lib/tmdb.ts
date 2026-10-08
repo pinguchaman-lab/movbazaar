@@ -25,7 +25,8 @@ const memoryCache = new Map<string, { data: unknown; expiresAt: number }>();
 async function tmdbFetch<T>(
   endpoint: string,
   params: Record<string, string | number> = {},
-  revalidate = 3600
+  revalidate = 86400,
+  timeoutMs = 2800
 ): Promise<T | null> {
   if (!API_KEY) {
     return null;
@@ -49,13 +50,14 @@ async function tmdbFetch<T>(
     }
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 6000);
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
     const res = await fetch(url.toString(), {
       signal: controller.signal,
       next: { revalidate },
       headers: {
         Accept: "application/json",
+        "Accept-Encoding": "gzip, deflate, br",
       },
     });
 
@@ -542,7 +544,8 @@ export async function searchMulti(
   const data = await tmdbFetch<TMDBPaginatedResponse<MediaItem>>(
     "/search/multi",
     { query, page },
-    60
+    7200,
+    1200
   );
   if (data?.results && data.results.length > 0) {
     const filtered = data.results.filter(

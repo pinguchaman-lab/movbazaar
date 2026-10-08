@@ -28,7 +28,7 @@ export default function WatchlistPage() {
           </h1>
           <p className="text-xs text-zinc-400 mt-1">
             {items.length} {items.length === 1 ? "title" : "titles"} saved to your
-            personal list
+            streaming watchlist
           </p>
         </div>
       </div>

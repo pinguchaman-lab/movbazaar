@@ -73,3 +73,4 @@ In the **Environment Variables** section on Vercel, add the following key-value 
    - Server 3: VidSrc SU (Fast Mirror)
    - Server 4: AutoEmbed CO (Auto HD Direct)
    - Server 5: 2Embed CC (Backup Direct Stream)
+

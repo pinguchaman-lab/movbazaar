@@ -2,6 +2,14 @@ import React from "react";
 import { getTVGenres, discoverTV } from "@/lib/tmdb";
 import { CatalogView } from "@/components/catalog/CatalogView";
 
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "TV Shows & Series — Stream All Seasons Online Free in HD",
+  description:
+    "Explore full seasons and episodes of top web series, Korean dramas, Indian shows, and trending television series with multi-track audio on MovBazaar.",
+};
+
 interface PageProps {
   searchParams: {
     genre?: string;

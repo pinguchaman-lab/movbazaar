@@ -43,6 +43,7 @@ export function Navbar() {
   const [searchDropdownOpen, setSearchDropdownOpen] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const langContainerRef = useRef<HTMLDivElement>(null);
+  const searchCacheRef = useRef<Map<string, MediaItem[]>>(new Map());
 
   // Scroll listener for translucent background
   useEffect(() => {
@@ -79,10 +80,19 @@ export function Navbar() {
     setSearchDropdownOpen(false);
   }, [pathname]);
 
-  // Debounced search
+  // High-performance instant cached & debounced search (180ms)
   useEffect(() => {
-    if (!searchQuery.trim()) {
+    const trimmed = searchQuery.trim();
+    if (!trimmed) {
       setSearchResults([]);
+      setIsSearching(false);
+      return;
+    }
+
+    // Instant zero-millisecond response from client cache if already looked up
+    if (searchCacheRef.current.has(trimmed)) {
+      setSearchResults(searchCacheRef.current.get(trimmed)!);
+      setSearchDropdownOpen(true);
       setIsSearching(false);
       return;
     }
@@ -90,10 +100,12 @@ export function Navbar() {
     const timer = setTimeout(async () => {
       setIsSearching(true);
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(searchQuery.trim())}&suggest=true`);
+        const res = await fetch(`/api/search?q=${encodeURIComponent(trimmed)}&suggest=true`);
         if (res.ok) {
           const data = await res.json();
-          setSearchResults(data.results?.slice(0, 8) || []);
+          const items = data.results?.slice(0, 8) || [];
+          searchCacheRef.current.set(trimmed, items);
+          setSearchResults(items);
           setSearchDropdownOpen(true);
         }
       } catch (err) {
@@ -101,7 +113,7 @@ export function Navbar() {
       } finally {
         setIsSearching(false);
       }
-    }, 300);
+    }, 180);
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
@@ -207,6 +219,8 @@ export function Navbar() {
                             <Link
                               key={`movie-${movie.id}`}
                               href={`/movie/${movie.id}`}
+                              prefetch={true}
+                              onMouseEnter={() => router.prefetch(`/movie/${movie.id}`)}
                               onClick={() => setSearchDropdownOpen(false)}
                               className="flex items-center gap-3 p-2 rounded-lg hover:bg-zinc-800/80 transition-colors group"
                             >
@@ -251,6 +265,8 @@ export function Navbar() {
                             <Link
                               key={`tv-${show.id}`}
                               href={`/tv/${show.id}`}
+                              prefetch={true}
+                              onMouseEnter={() => router.prefetch(`/tv/${show.id}`)}
                               onClick={() => setSearchDropdownOpen(false)}
                               className="flex items-center gap-3 p-2 rounded-lg hover:bg-zinc-800/80 transition-colors group"
                             >

@@ -2,6 +2,14 @@ import React from "react";
 import { getMovieGenres, discoverMovies } from "@/lib/tmdb";
 import { CatalogView } from "@/components/catalog/CatalogView";
 
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Movies Catalog — Stream Trending Movies Online Free in HD",
+  description:
+    "Browse the full MovBazaar movies library. Stream Bollywood, Hollywood, and international blockbusters in Full HD with Dual Audio and subtitles.",
+};
+
 interface PageProps {
   searchParams: {
     genre?: string;

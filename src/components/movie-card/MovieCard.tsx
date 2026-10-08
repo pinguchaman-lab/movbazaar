@@ -59,7 +59,11 @@ export function MovieCard({
 
   return (
     <div className="group relative rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800/80 transition-all duration-300 hover:border-zinc-700 hover:shadow-2xl hover:shadow-black/70 hover:-translate-y-1">
-      <Link href={href} className="block aspect-[2/3] relative w-full overflow-hidden">
+      <Link
+        href={href}
+        prefetch={true}
+        className="block aspect-[2/3] relative w-full overflow-hidden"
+      >
         <Image
           src={imgSrc}
           alt={title || "Poster"}
@@ -90,6 +94,7 @@ export function MovieCard({
         <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <Link
             href={playHref}
+            prefetch={true}
             onClick={(e) => e.stopPropagation()}
             className="w-10 h-10 rounded-full bg-[#e50914] text-white flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-transform"
             title={

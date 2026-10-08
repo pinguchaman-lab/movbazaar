@@ -6,6 +6,8 @@ import { getEpisodeSources, getDemoSampleSources } from "@/lib/omss";
 import { WatchPlayerContainer } from "@/components/video-player/WatchPlayerContainer";
 import { ArrowLeft, Play, Sparkles } from "lucide-react";
 
+import { Metadata } from "next";
+
 interface WatchTVPageProps {
   params: {
     id: string;
@@ -19,6 +21,20 @@ interface WatchTVPageProps {
 }
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }: WatchTVPageProps): Promise<Metadata> {
+  const tvId = parseInt(params.id, 10);
+  if (isNaN(tvId)) return { title: "Watch TV Episode | MovBazaar" };
+
+  const tvShow = await getTVDetails(tvId);
+  const title = tvShow
+    ? `Now Streaming: ${tvShow.name} S${params.season}E${params.episode} | MovBazaar`
+    : "Watch TV Episode | MovBazaar";
+  return {
+    title,
+    description: `Watch ${tvShow?.name || "TV Show"} Season ${params.season} Episode ${params.episode} in HD with Dual Audio and subtitles on MovBazaar.`,
+  };
+}
 
 export default async function WatchTVPage({
   params,

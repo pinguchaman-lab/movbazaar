@@ -18,7 +18,7 @@ export const config = {
   },
   app: {
     name: "MovBazaar",
-    description: "Personal Movie & TV Streaming Hub",
+    description: "Premier Ultra HD Movies & TV Streaming Platform",
   },
 };
 

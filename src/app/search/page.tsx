@@ -2,9 +2,19 @@ import React from "react";
 import { searchMulti } from "@/lib/tmdb";
 import { SearchView } from "@/components/search/SearchView";
 
+import { Metadata } from "next";
+
 interface SearchPageProps {
   searchParams: {
     q?: string;
+  };
+}
+
+export function generateMetadata({ searchParams }: SearchPageProps): Metadata {
+  const query = searchParams.q ? `"${searchParams.q}"` : "Movies & TV Series";
+  return {
+    title: `Search ${query} | MovBazaar`,
+    description: `Discover and stream free movies and TV shows matching ${query} in Ultra HD on MovBazaar.`,
   };
 }
 

@@ -8,6 +8,8 @@ import { getTmdbImageUrl } from "@/lib/config";
 import { OMSSAvailabilityBadge } from "@/components/omss-badge/OMSSAvailabilityBadge";
 import { WatchlistButton } from "@/components/details/WatchlistButton";
 
+import { Metadata } from "next";
+
 interface MoviePageProps {
   params: {
     id: string;
@@ -15,6 +17,43 @@ interface MoviePageProps {
 }
 
 export const revalidate = 3600;
+
+export async function generateMetadata({ params }: MoviePageProps): Promise<Metadata> {
+  const movieId = parseInt(params.id, 10);
+  if (isNaN(movieId)) return { title: "Movie Not Found | MovBazaar" };
+
+  const movie = await getMovieDetails(movieId);
+  if (!movie) return { title: "Movie Not Found | MovBazaar" };
+
+  const year = movie.release_date ? new Date(movie.release_date).getFullYear() : "";
+  const title = `Watch ${movie.title} ${year ? `(${year})` : ""} Full Movie Online Free in HD`;
+  const description = `Stream ${movie.title} in Ultra HD 1080p with Dual Audio (Hindi & English), subtitles, and fast server mirrors on MovBazaar. ${movie.overview ? movie.overview.slice(0, 140) + "..." : ""}`;
+  const posterUrl = getTmdbImageUrl(movie.poster_path, "w500");
+  const backdropUrl = getTmdbImageUrl(movie.backdrop_path, "original");
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [
+        {
+          url: backdropUrl || posterUrl || "/og-image.png",
+          width: 1200,
+          height: 630,
+          alt: movie.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [backdropUrl || posterUrl || "/og-image.png"],
+    },
+  };
+}
 
 export default async function MovieDetailsPage({ params }: MoviePageProps) {
   const movieId = parseInt(params.id, 10);
@@ -34,8 +73,30 @@ export default async function MovieDetailsPage({ params }: MoviePageProps) {
     movie.release_date && new Date(movie.release_date).getTime() > Date.now()
   );
 
+  const movieJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Movie",
+    name: movie.title,
+    description: movie.overview,
+    image: getTmdbImageUrl(movie.poster_path, "w500"),
+    datePublished: movie.release_date,
+    director: director ? { "@type": "Person", name: director.name } : undefined,
+    aggregateRating: movie.vote_average
+      ? {
+          "@type": "AggregateRating",
+          ratingValue: movie.vote_average.toFixed(1),
+          bestRating: "10",
+          ratingCount: movie.vote_count || 100,
+        }
+      : undefined,
+  };
+
   return (
     <div className="min-h-screen pb-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(movieJsonLd) }}
+      />
       {/* Backdrop Banner */}
       <div className="relative w-full h-[45vh] sm:h-[55vh] max-h-[500px] overflow-hidden bg-zinc-950">
         <Image

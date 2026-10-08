@@ -74,3 +74,4 @@ export function verifyVipCredentials(
 }
 
 export const VIP_COOKIE_NAME = "movbazaar_vip_token";
+
