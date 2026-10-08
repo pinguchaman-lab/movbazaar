@@ -184,21 +184,58 @@ export async function getTVGenres(): Promise<TMDBGenre[]> {
   return FALLBACK_GENRES.tv;
 }
 
+export interface DiscoverOptions {
+  genreId?: number;
+  sortBy?: string;
+  page?: number;
+  category?: string;
+  language?: string;
+  year?: number | string;
+}
+
 export async function discoverMovies({
   genreId,
   sortBy = "popularity.desc",
   page = 1,
-}: {
-  genreId?: number;
-  sortBy?: string;
-  page?: number;
-}): Promise<TMDBPaginatedResponse<TMDBMovie>> {
+  category,
+  language,
+  year,
+}: DiscoverOptions): Promise<TMDBPaginatedResponse<TMDBMovie>> {
   const params: Record<string, string | number> = {
     sort_by: sortBy,
     page,
   };
   if (genreId) {
     params.with_genres = genreId;
+  }
+
+  if (category === "korean" || language === "ko") {
+    params.with_original_language = "ko";
+  } else if (
+    category === "indian" ||
+    language === "hi" ||
+    (language && ["te", "ta", "ml", "kn", "bn"].includes(language))
+  ) {
+    params.with_original_language = language || "hi|te|ta|ml|kn";
+  } else if (category === "hollywood" || language === "en") {
+    params.with_original_language = "en";
+  } else if (language) {
+    params.with_original_language = language;
+  }
+
+  if (year) {
+    const yrStr = String(year);
+    if (yrStr === "2010s") {
+      params["primary_release_date.gte"] = "2010-01-01";
+      params["primary_release_date.lte"] = "2019-12-31";
+    } else if (yrStr === "2000s") {
+      params["primary_release_date.gte"] = "2000-01-01";
+      params["primary_release_date.lte"] = "2009-12-31";
+    } else if (yrStr === "classics") {
+      params["primary_release_date.lte"] = "1999-12-31";
+    } else {
+      params.primary_release_year = yrStr;
+    }
   }
 
   const data = await tmdbFetch<TMDBPaginatedResponse<TMDBMovie>>(
@@ -208,15 +245,60 @@ export async function discoverMovies({
   if (data?.results && data.results.length > 0) return data;
 
   let results = [...FALLBACK_MOVIES];
-  if (genreId) {
-    results = results.filter((m) => m.genre_ids?.includes(genreId));
+
+  if (category === "korean" || language === "ko") {
+    const filtered = results.filter((m) => m.original_language === "ko");
+    if (filtered.length > 0) results = filtered;
+  } else if (
+    category === "indian" ||
+    language === "hi" ||
+    (language && ["te", "ta", "ml", "kn", "bn"].includes(language))
+  ) {
+    const filtered = results.filter((m) =>
+      ["hi", "te", "ta", "ml", "kn", "bn"].includes(m.original_language || "")
+    );
+    if (filtered.length > 0) results = filtered;
+  } else if (category === "hollywood" || language === "en") {
+    const filtered = results.filter(
+      (m) => m.original_language === "en" || !m.original_language
+    );
+    if (filtered.length > 0) results = filtered;
   }
+
+  if (year) {
+    const yrStr = String(year);
+    if (yrStr === "2010s") {
+      const filtered = results.filter(
+        (m) => m.release_date >= "2010-01-01" && m.release_date <= "2019-12-31"
+      );
+      if (filtered.length > 0) results = filtered;
+    } else if (yrStr === "2000s") {
+      const filtered = results.filter(
+        (m) => m.release_date >= "2000-01-01" && m.release_date <= "2009-12-31"
+      );
+      if (filtered.length > 0) results = filtered;
+    } else if (yrStr === "classics") {
+      const filtered = results.filter((m) => m.release_date < "2000-01-01");
+      if (filtered.length > 0) results = filtered;
+    } else {
+      const filtered = results.filter((m) => m.release_date?.startsWith(yrStr));
+      if (filtered.length > 0) results = filtered;
+    }
+  }
+
+  if (genreId) {
+    const filtered = results.filter((m) => m.genre_ids?.includes(genreId));
+    if (filtered.length > 0) results = filtered;
+  }
+
   if (sortBy.includes("vote_average")) {
     results.sort((a, b) => b.vote_average - a.vote_average);
   } else if (sortBy.includes("primary_release_date")) {
     results.sort(
       (a, b) => new Date(b.release_date).getTime() - new Date(a.release_date).getTime()
     );
+  } else {
+    results.sort((a, b) => b.popularity - a.popularity);
   }
 
   return {
@@ -231,17 +313,45 @@ export async function discoverTV({
   genreId,
   sortBy = "popularity.desc",
   page = 1,
-}: {
-  genreId?: number;
-  sortBy?: string;
-  page?: number;
-}): Promise<TMDBPaginatedResponse<TMDBTVShow>> {
+  category,
+  language,
+  year,
+}: DiscoverOptions): Promise<TMDBPaginatedResponse<TMDBTVShow>> {
   const params: Record<string, string | number> = {
     sort_by: sortBy,
     page,
   };
   if (genreId) {
     params.with_genres = genreId;
+  }
+
+  if (category === "korean" || language === "ko") {
+    params.with_original_language = "ko";
+  } else if (
+    category === "indian" ||
+    language === "hi" ||
+    (language && ["te", "ta", "ml", "kn", "bn"].includes(language))
+  ) {
+    params.with_original_language = language || "hi|te|ta|ml|kn";
+  } else if (category === "hollywood" || language === "en") {
+    params.with_original_language = "en";
+  } else if (language) {
+    params.with_original_language = language;
+  }
+
+  if (year) {
+    const yrStr = String(year);
+    if (yrStr === "2010s") {
+      params["first_air_date.gte"] = "2010-01-01";
+      params["first_air_date.lte"] = "2019-12-31";
+    } else if (yrStr === "2000s") {
+      params["first_air_date.gte"] = "2000-01-01";
+      params["first_air_date.lte"] = "2009-12-31";
+    } else if (yrStr === "classics") {
+      params["first_air_date.lte"] = "1999-12-31";
+    } else {
+      params.first_air_date_year = yrStr;
+    }
   }
 
   const data = await tmdbFetch<TMDBPaginatedResponse<TMDBTVShow>>(
@@ -251,9 +361,52 @@ export async function discoverTV({
   if (data?.results && data.results.length > 0) return data;
 
   let results = [...FALLBACK_TV_SHOWS];
-  if (genreId) {
-    results = results.filter((t) => t.genre_ids?.includes(genreId));
+
+  if (category === "korean" || language === "ko") {
+    const filtered = results.filter((t) => t.original_language === "ko");
+    if (filtered.length > 0) results = filtered;
+  } else if (
+    category === "indian" ||
+    language === "hi" ||
+    (language && ["te", "ta", "ml", "kn", "bn"].includes(language))
+  ) {
+    const filtered = results.filter((t) =>
+      ["hi", "te", "ta", "ml", "kn", "bn"].includes(t.original_language || "")
+    );
+    if (filtered.length > 0) results = filtered;
+  } else if (category === "hollywood" || language === "en") {
+    const filtered = results.filter(
+      (t) => t.original_language === "en" || !t.original_language
+    );
+    if (filtered.length > 0) results = filtered;
   }
+
+  if (year) {
+    const yrStr = String(year);
+    if (yrStr === "2010s") {
+      const filtered = results.filter(
+        (t) => t.first_air_date >= "2010-01-01" && t.first_air_date <= "2019-12-31"
+      );
+      if (filtered.length > 0) results = filtered;
+    } else if (yrStr === "2000s") {
+      const filtered = results.filter(
+        (t) => t.first_air_date >= "2000-01-01" && t.first_air_date <= "2009-12-31"
+      );
+      if (filtered.length > 0) results = filtered;
+    } else if (yrStr === "classics") {
+      const filtered = results.filter((t) => t.first_air_date < "2000-01-01");
+      if (filtered.length > 0) results = filtered;
+    } else {
+      const filtered = results.filter((t) => t.first_air_date?.startsWith(yrStr));
+      if (filtered.length > 0) results = filtered;
+    }
+  }
+
+  if (genreId) {
+    const filtered = results.filter((t) => t.genre_ids?.includes(genreId));
+    if (filtered.length > 0) results = filtered;
+  }
+
   if (sortBy.includes("vote_average")) {
     results.sort((a, b) => b.vote_average - a.vote_average);
   } else if (sortBy.includes("first_air_date")) {
@@ -261,6 +414,8 @@ export async function discoverTV({
       (a, b) =>
         new Date(b.first_air_date).getTime() - new Date(a.first_air_date).getTime()
     );
+  } else {
+    results.sort((a, b) => b.popularity - a.popularity);
   }
 
   return {

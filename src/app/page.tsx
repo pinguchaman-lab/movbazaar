@@ -4,10 +4,13 @@ import {
   getPopularTV,
   getTopRatedMovies,
   getTopRatedTV,
+  discoverMovies,
+  discoverTV,
 } from "@/lib/tmdb";
 import { Hero } from "@/components/hero/Hero";
 import { MediaCarousel } from "@/components/carousel/MediaCarousel";
 import { ContinueWatching } from "@/components/continue-watching/ContinueWatching";
+import { AdBanner } from "@/components/ads/AdBanner";
 
 export const revalidate = 3600; // Cache for 1 hour
 
@@ -18,12 +21,16 @@ export default async function HomePage() {
     popularTvData,
     topRatedMoviesData,
     topRatedTvData,
+    indianMoviesData,
+    koreanTvData,
   ] = await Promise.all([
     getTrendingAll("day"),
     getPopularMovies(1),
     getPopularTV(1),
     getTopRatedMovies(1),
     getTopRatedTV(1),
+    discoverMovies({ category: "indian", page: 1 }),
+    discoverTV({ category: "korean", page: 1 }),
   ]);
 
   const heroItem =
@@ -36,7 +43,7 @@ export default async function HomePage() {
       {/* Hero Section */}
       {heroItem && <Hero item={heroItem} />}
 
-      <div className="space-y-10 sm:space-y-12">
+      <div className="space-y-10 sm:space-y-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Continue Watching Section (Client-rendered from LocalStorage) */}
         <ContinueWatching />
 
@@ -46,6 +53,29 @@ export default async function HomePage() {
           items={trendingItems}
           viewAllHref="/movies"
         />
+
+        {/* Indian Cinema Section */}
+        {indianMoviesData.results.length > 0 && (
+          <MediaCarousel
+            title="Indian Cinema (Bollywood & South Indian)"
+            items={indianMoviesData.results}
+            defaultType="movie"
+            viewAllHref="/movies?category=indian"
+          />
+        )}
+
+        {/* Sponsor Banner (Disappears automatically for VIP users) */}
+        <AdBanner slot="home-middle" />
+
+        {/* Korean K-Drama Section */}
+        {koreanTvData.results.length > 0 && (
+          <MediaCarousel
+            title="Trending K-Dramas & Korean Series"
+            items={koreanTvData.results}
+            defaultType="tv"
+            viewAllHref="/tv?category=korean"
+          />
+        )}
 
         {/* Popular Movies */}
         <MediaCarousel

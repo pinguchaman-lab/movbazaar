@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { StreamSource, Subtitle as OmssSubtitle } from "@/types/omss";
 import { VideoPlayer } from "./VideoPlayer";
 import { ServerSelectorBar } from "./ServerSelectorBar";
+import { AdBanner } from "@/components/ads/AdBanner";
 
 interface WatchPlayerContainerProps {
   sources: StreamSource[];
@@ -73,7 +74,9 @@ export function WatchPlayerContainer({
         onSelectSource={(s) => setActiveSourceId(s.id)}
         isUpcoming={isUpcoming}
       />
+
+      {/* Ad Banner Slot (Disappears 100% for Logged-In VIP Users) */}
+      <AdBanner slot="player-bottom" />
     </div>
   );
 }
-

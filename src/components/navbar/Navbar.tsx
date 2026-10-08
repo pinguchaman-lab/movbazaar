@@ -18,8 +18,10 @@ import {
   Settings,
   Loader2,
   Star,
+  Sparkles,
 } from "lucide-react";
 import { useLanguage, SUPPORTED_LANGUAGES } from "@/i18n";
+import { useAuth } from "@/context/AuthContext";
 import { MediaItem } from "@/types/tmdb";
 import { getTmdbImageUrl, config } from "@/lib/config";
 
@@ -27,6 +29,7 @@ export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { t, language, setLanguage } = useLanguage();
+  const { isVip, openLoginModal } = useAuth();
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -87,7 +90,7 @@ export function Navbar() {
     const timer = setTimeout(async () => {
       setIsSearching(true);
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(searchQuery.trim())}`);
+        const res = await fetch(`/api/search?q=${encodeURIComponent(searchQuery.trim())}&suggest=true`);
         if (res.ok) {
           const data = await res.json();
           setSearchResults(data.results?.slice(0, 8) || []);
@@ -333,6 +336,22 @@ export function Navbar() {
               )}
             </div>
 
+            {/* VIP Status / Ad-Free Access Button */}
+            <button
+              onClick={openLoginModal}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                isVip
+                  ? "bg-amber-500/15 hover:bg-amber-500/25 border-amber-500/40 text-amber-300 shadow-sm shadow-amber-950/40"
+                  : "bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 hover:text-white border-zinc-800"
+              }`}
+              title={isVip ? "VIP Active (100% Ad-Free)" : "VIP Login for Ad-Free Streaming"}
+            >
+              <Sparkles className={`w-3.5 h-3.5 ${isVip ? "text-amber-400" : "text-amber-400"}`} />
+              <span className="hidden sm:inline">
+                {isVip ? "VIP Active" : "VIP Pass"}
+              </span>
+            </button>
+
             {/* Settings Quick Modal Trigger */}
             <button
               onClick={() => setSettingsOpen(true)}
@@ -378,6 +397,27 @@ export function Navbar() {
                 </Link>
               );
             })}
+
+            {/* Mobile VIP Pass Trigger */}
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                openLoginModal();
+              }}
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors mt-2 border ${
+                isVip
+                  ? "bg-amber-500/15 border-amber-500/30 text-amber-300"
+                  : "bg-zinc-900 border-zinc-800 text-zinc-200 hover:bg-zinc-850"
+              }`}
+            >
+              <span className="flex items-center gap-3">
+                <Sparkles className="w-4 h-4 text-amber-400" />
+                <span>{isVip ? "VIP Member (Ad-Free Active)" : "VIP Ad-Free Login"}</span>
+              </span>
+              <span className="text-[10px] uppercase font-bold text-amber-400">
+                {isVip ? "Active" : "Sign In"}
+              </span>
+            </button>
           </div>
         )}
       </header>

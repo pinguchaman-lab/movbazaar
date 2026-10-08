@@ -29,7 +29,6 @@ export function ServerSelectorBar({
   const filteredSources = sources.filter((s) => {
     if (filter === "hindi") {
       const isDualAudio =
-        s.id.includes("superembed") ||
         s.id.includes("vidlink") ||
         s.audioTracks?.includes("Hindi") ||
         s.audioTracks?.includes("Multi");
@@ -39,6 +38,7 @@ export function ServerSelectorBar({
       return (
         s.id.includes("vidlink") ||
         s.id.includes("vidsrc-pm") ||
+        s.id.includes("vidsrc-su") ||
         s.id.includes("autoembed")
       );
     }
@@ -131,16 +131,13 @@ export function ServerSelectorBar({
           </div>
           <ul className="list-disc list-inside space-y-1 text-[11px] text-zinc-300 pl-1">
             <li>
-              <strong>Hollywood / International Movies:</strong> Switch to{" "}
-              <strong className="text-amber-300">SuperEmbed (Server 2)</strong>{" "}
-              or <strong className="text-amber-300">VidLink (Server 1)</strong>.
-              Inside the video player, click the <strong>Settings (Gear ⚙)</strong>{" "}
-              or <strong>Server Menu</strong> at the bottom/top of the video to toggle
-              between English and Hindi/Dual Audio tracks.
+              <strong>Hollywood & International Titles:</strong> Select{" "}
+              <strong className="text-amber-300">VidLink (Server 1)</strong>.
+              Inside the video player screen, click the <strong>Settings / Audio Track</strong> menu{" "}
+              to toggle between Original English and Hindi/Dual Audio dubbing.
             </li>
             <li>
-              <strong>Bollywood & Indian Cinema:</strong> Audio is already in
-              Hindi by default across all servers.
+              <strong>Bollywood & Indian Cinema:</strong> Native Hindi audio is active by default across all verified servers.
             </li>
           </ul>
         </div>
@@ -170,11 +167,12 @@ export function ServerSelectorBar({
           const quality = s.quality || "1080p";
           const isTrailer = s.id.includes("trailer");
           const hasHindi =
-            s.id.includes("superembed") ||
-            s.audioTracks?.includes("Hindi");
+            s.audioTracks?.includes("Hindi") ||
+            (s.id.includes("vidlink") && s.audioTracks?.includes("Hindi"));
           const hasMulti =
             s.audioTracks?.includes("Multi") ||
-            s.id.includes("vidlink");
+            s.id.includes("vidlink") ||
+            s.id.includes("vidsrc-pm");
 
           return (
             <button
