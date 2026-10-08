@@ -93,6 +93,11 @@ export function ServerSelector({
                   <div className="min-w-0 pr-2">
                     <div className="flex items-center gap-1.5 truncate">
                       <span className="truncate">{providerName}</span>
+                      {(s.id.includes("superembed") || s.audioTracks?.includes("Hindi")) && (
+                        <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[8px] font-bold">
+                          Dual Audio
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-2 mt-0.5 text-[10px] text-zinc-400 font-normal">
                       <span className="px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-200 font-mono text-[9px]">
@@ -100,7 +105,7 @@ export function ServerSelector({
                       </span>
                       <span>•</span>
                       <span className="text-zinc-500">
-                        {isEmbed ? "Direct Web Stream" : "HLS Direct"}
+                        {isEmbed ? "Web Stream" : "HLS Direct"}
                       </span>
                     </div>
                   </div>

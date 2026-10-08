@@ -407,12 +407,29 @@ export function getAvailableMediaSources(
     audioTracks: ["Original", "English", "Multi"],
     provider: {
       id: "vidlink-pro",
-      name: "VidLink (Fast 1080p)",
+      name: "VidLink (Fast 1080p • Multi)",
       latency: 15,
     },
   });
 
-  // Server 2: VidSrc PM (Cloudflare Ultra CDN, unblocked, 1080p)
+  // Server 2: SuperEmbed (Dual Audio, Hindi Dubbed & Multi-Host)
+  sources.push({
+    id: `superembed-${tmdbId}`,
+    url: isMovie
+      ? `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1`
+      : `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=${s}&e=${ep}`,
+    streamable: true,
+    type: "embed",
+    quality: "1080p",
+    audioTracks: ["Hindi", "English", "Multi"],
+    provider: {
+      id: "superembed",
+      name: "SuperEmbed (Hindi & Dual Audio)",
+      latency: 18,
+    },
+  });
+
+  // Server 3: VidSrc PM (Cloudflare Ultra CDN, unblocked, 1080p)
   sources.push({
     id: `vidsrc-pm-${tmdbId}`,
     url: isMovie
@@ -424,12 +441,12 @@ export function getAvailableMediaSources(
     audioTracks: ["Original", "English", "Multi"],
     provider: {
       id: "vidsrc-pm",
-      name: "VidSrc PM (Mirror 2)",
-      latency: 20,
+      name: "VidSrc PM (Fast Mirror)",
+      latency: 22,
     },
   });
 
-  // Server 3: VidSrc SU (High Availability Mirror, unblocked)
+  // Server 4: VidSrc SU (High Availability Mirror, unblocked)
   sources.push({
     id: `vidsrc-su-${tmdbId}`,
     url: isMovie
@@ -446,7 +463,7 @@ export function getAvailableMediaSources(
     },
   });
 
-  // Server 4: AutoEmbed (Fast Multi-CDN, unblocked)
+  // Server 5: AutoEmbed (Fast Multi-CDN, unblocked)
   sources.push({
     id: `autoembed-${tmdbId}`,
     url: isMovie
@@ -463,7 +480,7 @@ export function getAvailableMediaSources(
     },
   });
 
-  // Server 5: 2Embed (Direct Host, unblocked)
+  // Server 6: 2Embed (Direct Host, unblocked)
   sources.push({
     id: `2embed-${tmdbId}`,
     url: isMovie
@@ -475,25 +492,8 @@ export function getAvailableMediaSources(
     audioTracks: ["English"],
     provider: {
       id: "2embed",
-      name: "2Embed (Direct)",
+      name: "2Embed (Direct Host)",
       latency: 35,
-    },
-  });
-
-  // Server 6: SuperEmbed (Multi-Host Fallback)
-  sources.push({
-    id: `superembed-${tmdbId}`,
-    url: isMovie
-      ? `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1`
-      : `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=${s}&e=${ep}`,
-    streamable: true,
-    type: "embed",
-    quality: "1080p",
-    audioTracks: ["English", "Hindi", "Multi"],
-    provider: {
-      id: "superembed",
-      name: "SuperEmbed (Multi-Host)",
-      latency: 40,
     },
   });
 

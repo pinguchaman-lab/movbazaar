@@ -688,8 +688,14 @@ export function VideoPlayer({
 
       {/* Top Header Overlay (Back Button & Title) */}
       <div
-        className={`absolute top-0 left-0 right-0 z-30 p-4 sm:p-6 bg-gradient-to-b from-black/90 via-black/40 to-transparent transition-opacity duration-300 ${
-          showControls || !isPlaying ? "opacity-100" : "opacity-0 pointer-events-none"
+        className={`absolute top-0 left-0 right-0 z-30 p-3 sm:p-5 bg-gradient-to-b from-black/90 via-black/40 to-transparent transition-opacity duration-300 ${
+          activeSource.type === "embed"
+            ? showControls
+              ? "opacity-100"
+              : "opacity-0 pointer-events-none"
+            : showControls || !isPlaying
+            ? "opacity-100"
+            : "opacity-0 pointer-events-none"
         }`}
       >
         <div className="flex items-center justify-between gap-4">
@@ -896,30 +902,7 @@ export function VideoPlayer({
         </div>
       </div>
     )}
-
-      {/* Embedded Stream Server Indicator Pill */}
-      {activeSource.type === "embed" && (
-        <div
-          className={`absolute bottom-3 left-4 right-4 z-20 flex items-center justify-between pointer-events-none transition-opacity duration-300 ${
-            showControls ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          <div className="px-3 py-1.5 rounded-full bg-black/80 backdrop-blur-md border border-white/10 text-[11px] text-zinc-300 pointer-events-auto flex items-center gap-2 shadow-xl">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>
-              Streaming via{" "}
-              <strong className="text-white">
-                {activeSource.provider?.name || activeSource.id}
-              </strong>
-            </span>
-            <span className="text-zinc-500">•</span>
-            <span className="text-zinc-400">
-              Use top-right menu to switch server
-            </span>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+  </div>
+);
 }
 
