@@ -22,6 +22,7 @@ interface WatchPlayerContainerProps {
   nextEpisodeTitle?: string;
   initialTime?: number;
   isUpcoming?: boolean;
+  originalLanguage?: string;
 }
 
 export function WatchPlayerContainer({
@@ -40,6 +41,7 @@ export function WatchPlayerContainer({
   nextEpisodeTitle,
   initialTime = 0,
   isUpcoming = false,
+  originalLanguage,
 }: WatchPlayerContainerProps) {
   const [activeSourceId, setActiveSourceId] = useState<string>(
     sources[0]?.id || ""
@@ -73,6 +75,7 @@ export function WatchPlayerContainer({
         activeSourceId={activeSourceId}
         onSelectSource={(s) => setActiveSourceId(s.id)}
         isUpcoming={isUpcoming}
+        originalLanguage={originalLanguage}
       />
 
       {/* Ad Banner Slot (Disappears 100% for Logged-In VIP Users) */}

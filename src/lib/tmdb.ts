@@ -214,7 +214,13 @@ export async function discoverMovies({
     params.with_genres = genreId;
   }
 
-  if (category === "korean" || language === "ko") {
+  if (category === "south-indian") {
+    params.with_original_language = "te|ta|ml|kn";
+  } else if (category === "bollywood") {
+    params.with_original_language = "hi";
+  } else if (category === "hindi-dubbed") {
+    params.with_original_language = "hi|te|ta|ml|kn";
+  } else if (category === "korean" || language === "ko") {
     params.with_original_language = "ko";
   } else if (
     category === "indian" ||
@@ -251,7 +257,20 @@ export async function discoverMovies({
 
   let results = [...FALLBACK_MOVIES];
 
-  if (category === "korean" || language === "ko") {
+  if (category === "south-indian") {
+    const filtered = results.filter((m) =>
+      ["te", "ta", "ml", "kn"].includes(m.original_language || "")
+    );
+    if (filtered.length > 0) results = filtered;
+  } else if (category === "bollywood") {
+    const filtered = results.filter((m) => m.original_language === "hi");
+    if (filtered.length > 0) results = filtered;
+  } else if (category === "hindi-dubbed") {
+    const filtered = results.filter((m) =>
+      ["hi", "te", "ta", "ml", "kn", "en"].includes(m.original_language || "")
+    );
+    if (filtered.length > 0) results = filtered;
+  } else if (category === "korean" || language === "ko") {
     const filtered = results.filter((m) => m.original_language === "ko");
     if (filtered.length > 0) results = filtered;
   } else if (
@@ -267,6 +286,9 @@ export async function discoverMovies({
     const filtered = results.filter(
       (m) => m.original_language === "en" || !m.original_language
     );
+    if (filtered.length > 0) results = filtered;
+  } else if (language) {
+    const filtered = results.filter((m) => m.original_language === language);
     if (filtered.length > 0) results = filtered;
   }
 
@@ -330,7 +352,13 @@ export async function discoverTV({
     params.with_genres = genreId;
   }
 
-  if (category === "korean" || language === "ko") {
+  if (category === "south-indian") {
+    params.with_original_language = "te|ta|ml|kn";
+  } else if (category === "bollywood") {
+    params.with_original_language = "hi";
+  } else if (category === "hindi-dubbed") {
+    params.with_original_language = "hi|te|ta|ml|kn";
+  } else if (category === "korean" || language === "ko") {
     params.with_original_language = "ko";
   } else if (
     category === "indian" ||
@@ -367,7 +395,20 @@ export async function discoverTV({
 
   let results = [...FALLBACK_TV_SHOWS];
 
-  if (category === "korean" || language === "ko") {
+  if (category === "south-indian") {
+    const filtered = results.filter((t) =>
+      ["te", "ta", "ml", "kn"].includes(t.original_language || "")
+    );
+    if (filtered.length > 0) results = filtered;
+  } else if (category === "bollywood") {
+    const filtered = results.filter((t) => t.original_language === "hi");
+    if (filtered.length > 0) results = filtered;
+  } else if (category === "hindi-dubbed") {
+    const filtered = results.filter((t) =>
+      ["hi", "te", "ta", "ml", "kn", "en"].includes(t.original_language || "")
+    );
+    if (filtered.length > 0) results = filtered;
+  } else if (category === "korean" || language === "ko") {
     const filtered = results.filter((t) => t.original_language === "ko");
     if (filtered.length > 0) results = filtered;
   } else if (
@@ -383,6 +424,9 @@ export async function discoverTV({
     const filtered = results.filter(
       (t) => t.original_language === "en" || !t.original_language
     );
+    if (filtered.length > 0) results = filtered;
+  } else if (language) {
+    const filtered = results.filter((t) => t.original_language === language);
     if (filtered.length > 0) results = filtered;
   }
 

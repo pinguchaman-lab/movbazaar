@@ -395,7 +395,24 @@ export function getAvailableMediaSources(
     });
   }
 
-  // Server 1: VidLink Pro (Ultra-fast CDN, unblocked, 1080p, Hindi & Multi-Language Audio)
+  // Server 1: MultiEmbed (Specialized Hindi Dubbed & South Indian Multi-Audio Mirror)
+  sources.push({
+    id: `multiembed-${tmdbId}`,
+    url: isMovie
+      ? `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1`
+      : `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=${s}&e=${ep}`,
+    streamable: true,
+    type: "embed",
+    quality: "1080p",
+    audioTracks: ["Hindi", "English", "Tamil", "Telugu", "Multi"],
+    provider: {
+      id: "multiembed",
+      name: "MultiEmbed (Hindi Dub & South Audio)",
+      latency: 14,
+    },
+  });
+
+  // Server 2: VidLink Pro (Ultra-fast CDN, unblocked, 1080p, Hindi & Multi-Language Audio)
   sources.push({
     id: `vidlink-${tmdbId}`,
     url: isMovie
@@ -407,42 +424,25 @@ export function getAvailableMediaSources(
     audioTracks: ["Original", "English", "Hindi", "Multi"],
     provider: {
       id: "vidlink-pro",
-      name: "VidLink (Ultra 1080p • Multi-Audio)",
+      name: "VidLink (Ultra 1080p • Dual Audio)",
       latency: 12,
     },
   });
 
-  // Server 2: VidSrc PM (Cloudflare Ultra CDN, 100% unblocked, 1080p)
+  // Server 3: SmashyStream (Dual Audio Mirror • Hindi & Multi-Language)
   sources.push({
-    id: `vidsrc-pm-${tmdbId}`,
+    id: `smashystream-${tmdbId}`,
     url: isMovie
-      ? `https://vidsrc.pm/embed/movie/${tmdbId}`
-      : `https://vidsrc.pm/embed/tv/${tmdbId}/${s}/${ep}`,
+      ? `https://embed.smashystream.com/playere.php?tmdb=${tmdbId}`
+      : `https://embed.smashystream.com/playere.php?tmdb=${tmdbId}&season=${s}&episode=${ep}`,
     streamable: true,
     type: "embed",
     quality: "1080p",
-    audioTracks: ["Original", "English", "Multi"],
+    audioTracks: ["Hindi", "English", "Multi"],
     provider: {
-      id: "vidsrc-pm",
-      name: "VidSrc PM (Fast Mirror 1)",
-      latency: 18,
-    },
-  });
-
-  // Server 3: VidSrc SU (High Availability Mirror, unblocked, 1080p)
-  sources.push({
-    id: `vidsrc-su-${tmdbId}`,
-    url: isMovie
-      ? `https://vidsrc.su/embed/movie/${tmdbId}`
-      : `https://vidsrc.su/embed/tv/${tmdbId}/${s}/${ep}`,
-    streamable: true,
-    type: "embed",
-    quality: "1080p",
-    audioTracks: ["Original", "English"],
-    provider: {
-      id: "vidsrc-su",
-      name: "VidSrc SU (Fast Mirror 2)",
-      latency: 22,
+      id: "smashystream",
+      name: "SmashyStream (Dual Audio Mirror)",
+      latency: 20,
     },
   });
 
@@ -455,15 +455,66 @@ export function getAvailableMediaSources(
     streamable: true,
     type: "embed",
     quality: "1080p",
-    audioTracks: ["English", "Multi"],
+    audioTracks: ["English", "Hindi", "Multi"],
     provider: {
       id: "autoembed",
-      name: "AutoEmbed (Auto HD)",
+      name: "AutoEmbed (Auto HD • Multi-Dub)",
       latency: 26,
     },
   });
 
-  // Server 5: 2Embed CC (Direct Stream Host, unblocked)
+  // Server 5: VidSrc CC (Dual Audio & Cloud CDN)
+  sources.push({
+    id: `vidsrc-cc-${tmdbId}`,
+    url: isMovie
+      ? `https://vidsrc.cc/v2/embed/movie/${tmdbId}`
+      : `https://vidsrc.cc/v2/embed/tv/${tmdbId}/${s}/${ep}`,
+    streamable: true,
+    type: "embed",
+    quality: "1080p",
+    audioTracks: ["English", "Hindi", "Original"],
+    provider: {
+      id: "vidsrc-cc",
+      name: "VidSrc CC (Dual Audio)",
+      latency: 24,
+    },
+  });
+
+  // Server 6: VidSrc PM (Cloudflare Ultra CDN, 100% unblocked, 1080p Original Audio)
+  sources.push({
+    id: `vidsrc-pm-${tmdbId}`,
+    url: isMovie
+      ? `https://vidsrc.pm/embed/movie/${tmdbId}`
+      : `https://vidsrc.pm/embed/tv/${tmdbId}/${s}/${ep}`,
+    streamable: true,
+    type: "embed",
+    quality: "1080p",
+    audioTracks: ["Original", "English"],
+    provider: {
+      id: "vidsrc-pm",
+      name: "VidSrc PM (Original Audio • Fast)",
+      latency: 18,
+    },
+  });
+
+  // Server 7: VidSrc SU (High Availability Mirror, unblocked, 1080p Original Audio)
+  sources.push({
+    id: `vidsrc-su-${tmdbId}`,
+    url: isMovie
+      ? `https://vidsrc.su/embed/movie/${tmdbId}`
+      : `https://vidsrc.su/embed/tv/${tmdbId}/${s}/${ep}`,
+    streamable: true,
+    type: "embed",
+    quality: "1080p",
+    audioTracks: ["Original", "English"],
+    provider: {
+      id: "vidsrc-su",
+      name: "VidSrc SU (Original Audio • Mirror 2)",
+      latency: 22,
+    },
+  });
+
+  // Server 8: 2Embed CC (Direct Stream Host, unblocked)
   sources.push({
     id: `2embed-${tmdbId}`,
     url: isMovie
@@ -472,7 +523,7 @@ export function getAvailableMediaSources(
     streamable: true,
     type: "embed",
     quality: "1080p",
-    audioTracks: ["English"],
+    audioTracks: ["Original", "English"],
     provider: {
       id: "2embed",
       name: "2Embed (Backup Stream)",

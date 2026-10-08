@@ -9,6 +9,7 @@ interface ServerSelectorBarProps {
   activeSourceId: string;
   onSelectSource: (source: StreamSource) => void;
   isUpcoming?: boolean;
+  originalLanguage?: string;
 }
 
 export function ServerSelectorBar({
@@ -16,9 +17,15 @@ export function ServerSelectorBar({
   activeSourceId,
   onSelectSource,
   isUpcoming = false,
+  originalLanguage,
 }: ServerSelectorBarProps) {
-  const [filter, setFilter] = useState<"all" | "hindi" | "fast" | "loud">("all");
-  const [showHindiGuide, setShowHindiGuide] = useState(false);
+  const [audioMode, setAudioMode] = useState<"all" | "hindi" | "english">(
+    originalLanguage && ["te", "ta", "ml", "kn", "en"].includes(originalLanguage)
+      ? "hindi"
+      : "all"
+  );
+  const [filter, setFilter] = useState<"all" | "loud" | "fast">("all");
+  const [showDubGuide, setShowDubGuide] = useState(false);
   const [showVolumeGuide, setShowVolumeGuide] = useState(false);
 
   if (!sources || sources.length === 0) return null;
@@ -26,20 +33,94 @@ export function ServerSelectorBar({
   const activeIndex = sources.findIndex((s) => s.id === activeSourceId);
   const activeSource = sources[activeIndex >= 0 ? activeIndex : 0];
 
-  // Filter sources based on user preference
+  const isSouthIndian = Boolean(
+    originalLanguage && ["te", "ta", "ml", "kn"].includes(originalLanguage)
+  );
+  const isHollywood = originalLanguage === "en";
+
+  const getLangName = (code?: string) => {
+    switch (code) {
+      case "te":
+        return "Telugu (తెలుగు)";
+      case "ta":
+        return "Tamil (தமிழ்)";
+      case "ml":
+        return "Malayalam (മലയാളം)";
+      case "kn":
+        return "Kannada (ಕನ್ನಡ)";
+      case "hi":
+        return "Hindi (हिंदी)";
+      case "en":
+        return "English";
+      case "ko":
+        return "Korean (한국어)";
+      case "ja":
+        return "Japanese (日本語)";
+      default:
+        return code?.toUpperCase() || "Original";
+    }
+  };
+
+  const handleAudioModeChange = (mode: "all" | "hindi" | "english") => {
+    setAudioMode(mode);
+    if (mode === "hindi") {
+      setShowDubGuide(true);
+      const hindiSource = sources.find(
+        (s) =>
+          s.id.includes("multiembed") ||
+          s.id.includes("vidlink") ||
+          s.id.includes("smashystream") ||
+          s.id.includes("autoembed") ||
+          s.id.includes("vidsrc-cc") ||
+          s.audioTracks?.includes("Hindi") ||
+          s.audioTracks?.includes("Multi")
+      );
+      if (hindiSource && hindiSource.id !== activeSourceId) {
+        onSelectSource(hindiSource);
+      }
+    } else if (mode === "english") {
+      const origSource = sources.find(
+        (s) =>
+          s.id.includes("vidsrc-pm") ||
+          s.id.includes("vidsrc-su") ||
+          s.id.includes("2embed") ||
+          s.id.includes("vidlink")
+      );
+      if (origSource && origSource.id !== activeSourceId) {
+        onSelectSource(origSource);
+      }
+    }
+  };
+
+  // Filter sources based on user preference and audio language mode
   const filteredSources = sources.filter((s) => {
-    if (filter === "hindi") {
+    if (audioMode === "hindi") {
       const isDualAudio =
+        s.id.includes("multiembed") ||
         s.id.includes("vidlink") ||
+        s.id.includes("smashystream") ||
+        s.id.includes("autoembed") ||
+        s.id.includes("vidsrc-cc") ||
         s.audioTracks?.includes("Hindi") ||
         s.audioTracks?.includes("Multi");
-      return isDualAudio;
+      if (!isDualAudio) return false;
+    } else if (audioMode === "english") {
+      const isOriginal =
+        s.id.includes("vidsrc-pm") ||
+        s.id.includes("vidsrc-su") ||
+        s.id.includes("2embed") ||
+        s.id.includes("vidlink") ||
+        s.audioTracks?.includes("Original") ||
+        s.audioTracks?.includes("English");
+      if (!isOriginal) return false;
     }
+
     if (filter === "fast") {
       return (
         s.id.includes("vidlink") ||
         s.id.includes("vidsrc-pm") ||
         s.id.includes("vidsrc-su") ||
+        s.id.includes("multiembed") ||
         s.id.includes("autoembed")
       );
     }
@@ -47,6 +128,7 @@ export function ServerSelectorBar({
       return (
         s.id.includes("vidlink") ||
         s.id.includes("autoembed") ||
+        s.id.includes("multiembed") ||
         s.type === "hls"
       );
     }
@@ -64,19 +146,19 @@ export function ServerSelectorBar({
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs sm:text-sm font-bold text-white tracking-wide uppercase">
-                Streaming Servers
+                Streaming Servers &amp; Dubs
               </span>
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300 font-mono">
                 {sources.length} Mirrors
               </span>
             </div>
             <p className="text-[11px] text-zinc-400 hidden sm:block">
-              Switch mirrors instantly if any stream buffers, lacks audio, or has latency
+              Switch between Hindi Dubbed and Original studio audio across independent mirrors
             </p>
           </div>
         </div>
 
-        {/* Active Server Pill & Filter Controls */}
+        {/* Active Server Pill & Quick Filters */}
         <div className="flex items-center gap-2 flex-wrap">
           <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-zinc-950/70 border border-zinc-800 text-[11px] text-zinc-300">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -110,17 +192,6 @@ export function ServerSelectorBar({
               <span>Loud Audio</span>
             </button>
             <button
-              onClick={() => setFilter("hindi")}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1 transition-colors ${
-                filter === "hindi"
-                  ? "bg-amber-600 text-white shadow"
-                  : "text-zinc-400 hover:text-white"
-              }`}
-            >
-              <Globe className="w-3 h-3" />
-              <span>Hindi / Dual</span>
-            </button>
-            <button
               onClick={() => setFilter("fast")}
               className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors ${
                 filter === "fast"
@@ -135,7 +206,7 @@ export function ServerSelectorBar({
           <button
             onClick={() => {
               setShowVolumeGuide(!showVolumeGuide);
-              if (showHindiGuide) setShowHindiGuide(false);
+              if (showDubGuide) setShowDubGuide(false);
             }}
             className={`px-2 py-1 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors border ${
               showVolumeGuide
@@ -150,16 +221,118 @@ export function ServerSelectorBar({
 
           <button
             onClick={() => {
-              setShowHindiGuide(!showHindiGuide);
+              setShowDubGuide(!showDubGuide);
               if (showVolumeGuide) setShowVolumeGuide(false);
             }}
-            className="p-1.5 rounded-xl bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-300 hover:text-white transition-colors border border-zinc-700/60"
-            title="How Multi-Audio / Hindi Audio Works"
+            className={`p-1.5 rounded-xl text-zinc-300 hover:text-white transition-colors border ${
+              showDubGuide
+                ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
+                : "bg-zinc-800/80 hover:bg-zinc-700/80 border-zinc-700/60"
+            }`}
+            title="How Multi-Audio & Hindi Dubbing Works"
           >
             <HelpCircle className="w-4 h-4 text-amber-400" />
           </button>
         </div>
       </div>
+
+      {/* Prominent Audio Language Mode Switcher Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl bg-zinc-950/90 border border-zinc-800">
+        <div className="space-y-0.5">
+          <div className="flex items-center gap-2">
+            <Globe className="w-4 h-4 text-[#e50914]" />
+            <span className="text-xs font-bold text-white uppercase tracking-wider">
+              Audio Language Selection:
+            </span>
+          </div>
+          <p className="text-[11px] text-zinc-400">
+            Switch between Hindi Dubbed or Original English / South Indian audio instantly
+          </p>
+        </div>
+
+        <div className="flex items-center gap-1.5 bg-zinc-900/90 p-1 rounded-xl border border-zinc-800 self-start sm:self-auto flex-wrap">
+          <button
+            onClick={() => handleAudioModeChange("hindi")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+              audioMode === "hindi"
+                ? "bg-gradient-to-r from-amber-600 to-red-600 text-white shadow-lg shadow-red-950/60 ring-1 ring-amber-400"
+                : "text-zinc-400 hover:text-white hover:bg-zinc-800/60"
+            }`}
+          >
+            <span>🇮🇳 Hindi Dubbed (हिंदी)</span>
+          </button>
+          <button
+            onClick={() => handleAudioModeChange("english")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+              audioMode === "english"
+                ? "bg-gradient-to-r from-sky-600 to-indigo-600 text-white shadow-lg shadow-sky-950/60 ring-1 ring-sky-400"
+                : "text-zinc-400 hover:text-white hover:bg-zinc-800/60"
+            }`}
+          >
+            <span>🌐 English / Original</span>
+          </button>
+          <button
+            onClick={() => handleAudioModeChange("all")}
+            className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              audioMode === "all"
+                ? "bg-zinc-800 text-white"
+                : "text-zinc-400 hover:text-white hover:bg-zinc-800/60"
+            }`}
+          >
+            <span>All Mirrors ({sources.length})</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Regional Context Banner (South Indian / Hollywood) */}
+      {isSouthIndian && (
+        <div className="p-3 rounded-xl bg-orange-950/30 border border-orange-800/40 text-orange-200 text-xs flex items-start gap-2.5">
+          <Sparkles className="w-4 h-4 text-orange-400 flex-shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <div className="font-bold text-orange-300 flex items-center gap-1.5 flex-wrap">
+              <span>South Indian Film: {getLangName(originalLanguage)}</span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/30">
+                Hindi Dubbed Available
+              </span>
+            </div>
+            <p className="text-[11px] text-zinc-300 leading-relaxed">
+              This movie was originally filmed in {getLangName(originalLanguage)}. To watch the <strong>Hindi Dubbed</strong> version, select <strong>Hindi Dubbed (हिंदी)</strong> above — <strong>Server 1 (MultiEmbed)</strong> and <strong>Server 2 (VidLink)</strong> provide the official Hindi theatrical dubbing!
+            </p>
+          </div>
+        </div>
+      )}
+
+      {isHollywood && (
+        <div className="p-3 rounded-xl bg-sky-950/30 border border-sky-800/40 text-sky-200 text-xs flex items-start gap-2.5">
+          <Globe className="w-4 h-4 text-sky-400 flex-shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <div className="font-bold text-sky-300 flex items-center gap-1.5">
+              <span>Hollywood International Title — Dual Audio</span>
+            </div>
+            <p className="text-[11px] text-zinc-300 leading-relaxed">
+              Choose <strong>Hindi Dubbed (हिंदी)</strong> for Indian voiceover (Server 1 &amp; Server 2) or <strong>English / Original</strong> for pristine studio audio with subtitles.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Hindi Dubbing In-Player Switching Guide Banner */}
+      {(showDubGuide || audioMode === "hindi") && (
+        <div className="p-3.5 rounded-xl bg-amber-950/30 border border-amber-800/40 text-amber-200 text-xs space-y-1.5 animate-in fade-in duration-200">
+          <div className="flex items-center gap-2 font-bold text-amber-300">
+            <Volume2 className="w-4 h-4 text-amber-400" />
+            <span>How to switch audio track inside the video screen:</span>
+          </div>
+          <ul className="list-disc list-inside space-y-1 text-[11px] text-zinc-300 pl-1 leading-relaxed">
+            <li>
+              <strong>Inside Video Player:</strong> In <strong>Server 1 (MultiEmbed)</strong> or <strong>Server 2 (VidLink)</strong>, click the <strong>Settings (⚙️) / Audio Track</strong> icon inside the video frame and select <strong>&quot;Hindi&quot;</strong> or <strong>&quot;Dual Audio&quot;</strong> if it does not start automatically.
+            </li>
+            <li>
+              <strong>Alternate Dub Mirrors:</strong> If Server 1 plays in original sound or buffers, select <strong>Server 2 (VidLink)</strong>, <strong>Server 3 (SmashyStream)</strong>, or <strong>Server 4 (AutoEmbed)</strong> below — each mirror is loaded with different audio feeds.
+            </li>
+          </ul>
+        </div>
+      )}
 
       {/* Volume & Low Sound Troubleshooting Banner */}
       {showVolumeGuide && (
@@ -173,34 +346,13 @@ export function ServerSelectorBar({
               <strong>Internal Player Slider:</strong> Embedded players inside the video window often default to 50% volume. Hover or tap the video player, find the speaker slider next to the play button, and drag it to 100%.
             </li>
             <li>
-              <strong>Switch to High-Gain Servers:</strong> Some servers stream raw 5.1 cinema surround sound where vocal dialogue is quiet on laptop/mobile speakers. Select <strong className="text-amber-300">Server 1 (VidLink)</strong> or <strong className="text-emerald-300">Server 4 (AutoEmbed)</strong> for loud stereo mastered audio.
+              <strong>Switch to High-Gain Servers:</strong> Some servers stream raw 5.1 cinema surround sound where vocal dialogue is quiet on laptop/mobile speakers. Select <strong className="text-amber-300">Server 2 (VidLink)</strong> or <strong className="text-emerald-300">Server 4 (AutoEmbed)</strong> for loud stereo mastered audio.
             </li>
             <li>
-              <strong>Change Audio Track:</strong> Inside Server 1&apos;s settings (gear icon inside video), switching audio tracks (e.g. Stereo, Dual Audio, or English Stereo) provides amplified dialogue.
+              <strong>Change Audio Track:</strong> Inside Server 2&apos;s settings (gear icon inside video), switching audio tracks (e.g. Stereo, Dual Audio, or English Stereo) provides amplified dialogue.
             </li>
             <li>
               <strong>Native Player Booster:</strong> When watching via direct stream, press <strong className="text-amber-300">B</strong> or click the <strong className="text-amber-300">Boost (150% - 300%)</strong> button next to the volume slider to amplify quiet audio.
-            </li>
-          </ul>
-        </div>
-      )}
-
-      {/* Multi-Audio & Hindi Dubbing Guide Banner */}
-      {showHindiGuide && (
-        <div className="p-3.5 rounded-xl bg-amber-950/30 border border-amber-800/40 text-amber-200 text-xs space-y-1.5 animate-in fade-in duration-200">
-          <div className="flex items-center gap-2 font-bold text-amber-300">
-            <Volume2 className="w-4 h-4 text-amber-400" />
-            <span>How to access Hindi &amp; Multi-Language Audio:</span>
-          </div>
-          <ul className="list-disc list-inside space-y-1 text-[11px] text-zinc-300 pl-1">
-            <li>
-              <strong>Hollywood &amp; International Titles:</strong> Select{" "}
-              <strong className="text-amber-300">VidLink (Server 1)</strong>.
-              Inside the video player screen, click the <strong>Settings / Audio Track</strong> menu{" "}
-              to toggle between Original English and Hindi/Dual Audio dubbing.
-            </li>
-            <li>
-              <strong>Bollywood &amp; Indian Cinema:</strong> Native Hindi audio is active by default across all verified servers.
             </li>
           </ul>
         </div>
@@ -231,7 +383,15 @@ export function ServerSelectorBar({
           const isTrailer = s.id.includes("trailer");
           const hasHindi =
             s.audioTracks?.includes("Hindi") ||
-            (s.id.includes("vidlink") && s.audioTracks?.includes("Hindi"));
+            s.id.includes("multiembed") ||
+            s.id.includes("vidlink") ||
+            s.id.includes("smashystream") ||
+            s.id.includes("autoembed") ||
+            s.id.includes("vidsrc-cc");
+          const isOriginal =
+            s.id.includes("vidsrc-pm") ||
+            s.id.includes("vidsrc-su") ||
+            s.id.includes("2embed");
           const hasMulti =
             s.audioTracks?.includes("Multi") ||
             s.id.includes("vidlink") ||
@@ -285,14 +445,14 @@ export function ServerSelectorBar({
 
                 {hasHindi ? (
                   <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/25 text-amber-300 border border-amber-500/30">
-                    Dual Audio
+                    🇮🇳 Hindi Dub
                   </span>
-                ) : s.id.includes("autoembed") ? (
-                  <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                    Loud Audio
+                ) : isOriginal ? (
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-sky-500/20 text-sky-300 border border-sky-500/30">
+                    🌐 Original
                   </span>
                 ) : hasMulti ? (
-                  <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-sky-500/20 text-sky-300 border border-sky-500/30">
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/30">
                     Multi
                   </span>
                 ) : (

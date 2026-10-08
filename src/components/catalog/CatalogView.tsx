@@ -88,19 +88,23 @@ export function CatalogView({
 
   const categories = [
     { id: "all", label: "All Collections" },
-    { id: "indian", label: "Indian Cinema", color: "text-amber-400" },
-    { id: "korean", label: "Korean (K-Drama / Film)", color: "text-purple-400" },
-    { id: "hollywood", label: "Hollywood / English", color: "text-sky-400" },
+    { id: "hindi-dubbed", label: "🇮🇳 Hindi Dubbed / Dual Audio", color: "text-amber-400" },
+    { id: "south-indian", label: "🔥 South Indian (Hindi Dub)", color: "text-orange-400" },
+    { id: "bollywood", label: "🎬 Bollywood (Hindi)", color: "text-red-400" },
+    { id: "hollywood", label: "🍿 Hollywood (Hindi & Eng)", color: "text-sky-400" },
+    { id: "korean", label: "🇰🇷 Korean (K-Drama / Film)", color: "text-purple-400" },
   ];
 
   const languageOptions = [
     { value: "all", label: "All Languages" },
-    { value: "hi", label: "Hindi (हिंदी)" },
-    { value: "en", label: "English" },
-    { value: "ko", label: "Korean (한국어)" },
+    { value: "hi", label: "Hindi (हिंदी / Dubbed)" },
+    { value: "en", label: "English (Original / Dubbed)" },
     { value: "te", label: "Telugu (తెలుగు)" },
     { value: "ta", label: "Tamil (தமிழ்)" },
-    { value: "ja", label: "Japanese (日本語)" },
+    { value: "ml", label: "Malayalam (മലയാളം)" },
+    { value: "kn", label: "Kannada (ಕನ್ನಡ)" },
+    { value: "ko", label: "Korean (한국어)" },
+    { value: "ja", label: "Japanese (Anime)" },
     { value: "es", label: "Spanish (Español)" },
     { value: "fr", label: "French (Français)" },
   ];

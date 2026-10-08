@@ -120,6 +120,7 @@ export default async function WatchTVPage({
           mediaType="tv"
           tmdbId={tvShow.id}
           title={tvShow.name}
+          originalLanguage={tvShow.original_language}
           posterPath={tvShow.poster_path}
           backdropPath={tvShow.backdrop_path}
           season={seasonNum}

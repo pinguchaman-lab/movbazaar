@@ -104,6 +104,7 @@ export default async function WatchMoviePage({
           mediaType="movie"
           tmdbId={movie.id}
           title={movie.title}
+          originalLanguage={movie.original_language}
           posterPath={movie.poster_path}
           backdropPath={movie.backdrop_path}
           initialTime={initialTime}
