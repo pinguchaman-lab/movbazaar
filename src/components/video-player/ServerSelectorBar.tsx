@@ -83,7 +83,6 @@ export function ServerSelectorBar({
       setShowDubGuide(true);
       const hindiSource = sources.find(
         (s) =>
-          s.id.includes("multiembed") ||
           s.id.includes("autoembed") ||
           s.id.includes("vidlink") ||
           s.id.includes("vidcore") ||
@@ -113,7 +112,6 @@ export function ServerSelectorBar({
   const filteredSources = sources.filter((s) => {
     if (audioMode === "hindi") {
       const isDualAudio =
-        s.id.includes("multiembed") ||
         s.id.includes("autoembed") ||
         s.id.includes("vidlink") ||
         s.id.includes("vidcore") ||
@@ -125,11 +123,11 @@ export function ServerSelectorBar({
         s.id.includes("autoembed") ||
         s.id.includes("vidsrc-pm") ||
         s.id.includes("vidsrc-su") ||
+        s.id.includes("vidsrc-sh") ||
         s.id.includes("vidcore") ||
         s.id.includes("2embed") ||
         s.id.includes("2embed-skin") ||
         s.id.includes("vidfast") ||
-        s.id.includes("vidsrc-ru") ||
         s.id.includes("vidlink") ||
         s.audioTracks?.includes("Original") ||
         s.audioTracks?.includes("English");
@@ -330,7 +328,7 @@ export function ServerSelectorBar({
               </span>
             </div>
             <p className="text-[11px] text-zinc-300 leading-relaxed">
-              This movie was originally filmed in {getLangName(originalLanguage)}. To watch the <strong>Hindi Dubbed</strong> version, select <strong>Hindi Dubbed (हिंदी)</strong> above — <strong>Server 1 (MultiEmbed)</strong>, <strong>Server 2 (AutoEmbed)</strong>, and <strong>Server 3 (VidLink)</strong> provide official Indian theatrical dubbing feeds!
+              This movie was originally filmed in {getLangName(originalLanguage)}. To watch the <strong>Hindi Dubbed</strong> version, select <strong>Hindi Dubbed (हिंदी)</strong> above — <strong>Server 1 (AutoEmbed)</strong> and <strong>Server 2 (VidLink)</strong> provide official Indian theatrical dubbing feeds!
             </p>
           </div>
         </div>
@@ -359,10 +357,10 @@ export function ServerSelectorBar({
           </div>
           <ul className="list-disc list-inside space-y-1 text-[11px] text-zinc-300 pl-1 leading-relaxed">
             <li>
-              <strong>Inside Video Player:</strong> In <strong>Server 1 (MultiEmbed)</strong>, <strong>Server 2 (AutoEmbed)</strong>, or <strong>Server 3 (VidLink)</strong>, click the <strong>Settings (⚙️) / Audio Track</strong> icon inside the video frame and select <strong>&quot;Hindi&quot;</strong> or <strong>&quot;Dual Audio&quot;</strong> if it does not start automatically.
+              <strong>Inside Video Player:</strong> In <strong>Server 1 (AutoEmbed)</strong> or <strong>Server 2 (VidLink)</strong>, click the <strong>Settings (⚙️) / Audio Track</strong> icon inside the video frame and select <strong>&quot;Hindi&quot;</strong> or <strong>&quot;Dual Audio&quot;</strong> if it does not start automatically.
             </li>
             <li>
-              <strong>Alternate Dub Mirrors:</strong> If Server 1 shows &quot;Not Found&quot; or buffers, click <strong>&quot;Server Not Working? Try Next&quot;</strong> above or select <strong>Server 2 (AutoEmbed)</strong>, <strong>Server 3 (VidLink)</strong>, or <strong>Server 4 (VidCore)</strong> below — each mirror is loaded with different audio feeds.
+              <strong>Alternate Dub Mirrors:</strong> If Server 1 shows &quot;Not Found&quot; or buffers, click <strong>&quot;Server Not Working? Try Next&quot;</strong> above or select <strong>Server 2 (VidLink)</strong>, <strong>Server 3 (VidSrc PM)</strong>, or <strong>Server 9 (VidCore)</strong> below.
             </li>
           </ul>
         </div>
@@ -380,7 +378,7 @@ export function ServerSelectorBar({
               <strong>Internal Player Slider:</strong> Embedded players inside the video window often default to 50% volume. Hover or tap the video player, find the speaker slider next to the play button, and drag it to 100%.
             </li>
             <li>
-              <strong>Switch to High-Gain Servers:</strong> Some servers stream raw 5.1 cinema surround sound where vocal dialogue is quiet on laptop/mobile speakers. Select <strong className="text-amber-300">Server 2 (AutoEmbed)</strong> or <strong className="text-emerald-300">Server 4 (VidCore)</strong> for loud stereo mastered audio.
+              <strong>Switch to High-Gain Servers:</strong> Some servers stream raw 5.1 cinema surround sound where vocal dialogue is quiet on laptop/mobile speakers. Select <strong className="text-amber-300">Server 1 (AutoEmbed)</strong> or <strong className="text-emerald-300">Server 2 (VidLink)</strong> for loud stereo mastered audio.
             </li>
             <li>
               <strong>Change Audio Track:</strong> Inside Server 2 or Server 3 settings (gear icon inside video), switching audio tracks (e.g. Stereo, Dual Audio, or English Stereo) provides amplified dialogue.

@@ -719,6 +719,8 @@ export function VideoPlayer({
           className="w-full h-full border-0 bg-black"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen
+          referrerPolicy="origin"
+          loading="eager"
           title={title}
         />
       ) : (

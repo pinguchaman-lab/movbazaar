@@ -399,28 +399,7 @@ export function getAvailableMediaSources(
 
   const imdbId = options?.imdbId;
 
-  // Server 1: MultiEmbed VIP (Specialized Dual Audio & Indian Cinema/Serials Mirror)
-  sources.push({
-    id: `multiembed-${tmdbId}`,
-    url: isMovie
-      ? imdbId
-        ? `https://multiembed.mov/?video_id=${imdbId}`
-        : `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1`
-      : imdbId
-      ? `https://multiembed.mov/?video_id=${imdbId}&s=${s}&e=${ep}`
-      : `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=${s}&e=${ep}`,
-    streamable: true,
-    type: "embed",
-    quality: "1080p",
-    audioTracks: ["Hindi", "English", "Tamil", "Telugu", "Multi"],
-    provider: {
-      id: "multiembed",
-      name: "MultiEmbed (Hindi Dub & South Audio)",
-      latency: 14,
-    },
-  });
-
-  // Server 2: AutoEmbed CO (Ultra High Availability • Auto Multi-CDN)
+  // Server 1: AutoEmbed CO (Primary • Ultra High Availability • Auto Multi-CDN • 99.9% Uptime)
   sources.push({
     id: `autoembed-${tmdbId}`,
     url: isMovie
@@ -433,11 +412,11 @@ export function getAvailableMediaSources(
     provider: {
       id: "autoembed",
       name: "AutoEmbed (Auto HD • 99.9% Uptime)",
-      latency: 16,
+      latency: 12,
     },
   });
 
-  // Server 3: VidLink Pro (Ultra-fast Cloud CDN • Dual Audio & Subtitles)
+  // Server 2: VidLink Pro (Ultra-fast Cloud CDN • Dual Audio & Subtitles)
   sources.push({
     id: `vidlink-${tmdbId}`,
     url: isMovie
@@ -450,28 +429,11 @@ export function getAvailableMediaSources(
     provider: {
       id: "vidlink-pro",
       name: "VidLink (Ultra 1080p • Dual Audio)",
-      latency: 12,
+      latency: 14,
     },
   });
 
-  // Server 4: VidCore Stream (Modern Player • Fast HLS Multi-Audio)
-  sources.push({
-    id: `vidcore-${tmdbId}`,
-    url: isMovie
-      ? `https://vidcore.org/embed/movie/${tmdbId}`
-      : `https://vidcore.org/embed/series/${tmdbId}/${s}/${ep}`,
-    streamable: true,
-    type: "embed",
-    quality: "1080p",
-    audioTracks: ["Original", "English", "Hindi"],
-    provider: {
-      id: "vidcore",
-      name: "VidCore (Fast HLS • Multi-Language)",
-      latency: 15,
-    },
-  });
-
-  // Server 5: VidSrc PM (Cloudflare Ultra CDN, 100% unblocked)
+  // Server 3: VidSrc PM (Cloudflare Ultra CDN, 100% unblocked)
   sources.push({
     id: `vidsrc-pm-${tmdbId}`,
     url: isMovie
@@ -480,15 +442,15 @@ export function getAvailableMediaSources(
     streamable: true,
     type: "embed",
     quality: "1080p",
-    audioTracks: ["Original", "English"],
+    audioTracks: ["Original", "English", "Multi"],
     provider: {
       id: "vidsrc-pm",
       name: "VidSrc PM (Cloudflare CDN • Fast)",
-      latency: 18,
+      latency: 16,
     },
   });
 
-  // Server 6: VidSrc SU (High Availability Mirror 2)
+  // Server 4: VidSrc SU (High Availability Mirror 2)
   sources.push({
     id: `vidsrc-su-${tmdbId}`,
     url: isMovie
@@ -501,7 +463,41 @@ export function getAvailableMediaSources(
     provider: {
       id: "vidsrc-su",
       name: "VidSrc SU (Original Audio • Mirror 2)",
+      latency: 18,
+    },
+  });
+
+  // Server 5: VidSrc SH (Global Unblocked Node)
+  sources.push({
+    id: `vidsrc-sh-${tmdbId}`,
+    url: isMovie
+      ? `https://vidsrc.sh/embed/movie/${tmdbId}`
+      : `https://vidsrc.sh/embed/tv/${tmdbId}/${s}/${ep}`,
+    streamable: true,
+    type: "embed",
+    quality: "1080p",
+    audioTracks: ["Original", "English"],
+    provider: {
+      id: "vidsrc-sh",
+      name: "VidSrc SH (Global Direct Mirror)",
       latency: 20,
+    },
+  });
+
+  // Server 6: VidFast VC (High Speed Stream)
+  sources.push({
+    id: `vidfast-${tmdbId}`,
+    url: isMovie
+      ? `https://vidfast.vc/movie/${tmdbId}`
+      : `https://vidfast.vc/tv/${tmdbId}/${s}/${ep}`,
+    streamable: true,
+    type: "embed",
+    quality: "1080p",
+    audioTracks: ["Original", "English", "Multi"],
+    provider: {
+      id: "vidfast",
+      name: "VidFast (High Speed Stream)",
+      latency: 22,
     },
   });
 
@@ -518,11 +514,11 @@ export function getAvailableMediaSources(
     provider: {
       id: "2embed",
       name: "2Embed (Direct Stream Host)",
-      latency: 22,
+      latency: 24,
     },
   });
 
-  // Server 8: 2Embed Skin (Fast Backup Mirror)
+  // Server 8: 2Embed Skin (Fast Cloud Backup)
   sources.push({
     id: `2embed-skin-${tmdbId}`,
     url: isMovie
@@ -535,40 +531,23 @@ export function getAvailableMediaSources(
     provider: {
       id: "2embed-skin",
       name: "2Embed Skin (Fast Cloud Backup)",
-      latency: 24,
-    },
-  });
-
-  // Server 9: VidFast Pro (High Speed Node)
-  sources.push({
-    id: `vidfast-${tmdbId}`,
-    url: isMovie
-      ? `https://vidfast.pro/movie/${tmdbId}`
-      : `https://vidfast.pro/tv/${tmdbId}/${s}/${ep}`,
-    streamable: true,
-    type: "embed",
-    quality: "1080p",
-    audioTracks: ["Original", "English", "Multi"],
-    provider: {
-      id: "vidfast",
-      name: "VidFast (High Speed Stream)",
       latency: 25,
     },
   });
 
-  // Server 10: VidSrc RU (Global Unblocked Node)
+  // Server 9: VidCore Stream (Modern Player • Fast HLS Multi-Audio)
   sources.push({
-    id: `vidsrc-ru-${tmdbId}`,
+    id: `vidcore-${tmdbId}`,
     url: isMovie
-      ? `https://vidsrc-embed.ru/embed/movie/${tmdbId}`
-      : `https://vidsrc-embed.ru/embed/tv/${tmdbId}/${s}/${ep}`,
+      ? `https://vidcore.org/embed/movie/${tmdbId}`
+      : `https://vidcore.org/embed/series/${tmdbId}/${s}/${ep}`,
     streamable: true,
     type: "embed",
     quality: "1080p",
-    audioTracks: ["Original", "English"],
+    audioTracks: ["Original", "English", "Hindi"],
     provider: {
-      id: "vidsrc-ru",
-      name: "VidSrc Global (Unblocked Mirror)",
+      id: "vidcore",
+      name: "VidCore (Fast HLS • Multi-Language)",
       latency: 26,
     },
   });
