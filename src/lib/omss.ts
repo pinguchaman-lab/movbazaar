@@ -480,7 +480,58 @@ export function getAvailableMediaSources(
     },
   });
 
-  // Server 6: VidSrc PM (Cloudflare Ultra CDN, 100% unblocked, 1080p Original Audio)
+  // Server 6: SuperEmbed Stream (Direct Indian Cinema, Daily Serials & Web Series Mirror)
+  sources.push({
+    id: `superembed-${tmdbId}`,
+    url: isMovie
+      ? `https://multiembed.mov/directstream.php?video_id=${tmdbId}&tmdb=1`
+      : `https://multiembed.mov/directstream.php?video_id=${tmdbId}&tmdb=1&s=${s}&e=${ep}`,
+    streamable: true,
+    type: "embed",
+    quality: "1080p",
+    audioTracks: ["Hindi", "English", "Multi"],
+    provider: {
+      id: "superembed",
+      name: "SuperEmbed (Desi Serials & Dubs)",
+      latency: 16,
+    },
+  });
+
+  // Server 7: MoviesAPI Club (Ultra-fast TV Series & Anime Cloud Mirror)
+  sources.push({
+    id: `moviesapi-${tmdbId}`,
+    url: isMovie
+      ? `https://moviesapi.club/movie/${tmdbId}`
+      : `https://moviesapi.club/tv/${tmdbId}-${s}-${ep}`,
+    streamable: true,
+    type: "embed",
+    quality: "1080p",
+    audioTracks: ["English", "Hindi", "Original"],
+    provider: {
+      id: "moviesapi",
+      name: "MoviesAPI (Fast Anime & Series)",
+      latency: 18,
+    },
+  });
+
+  // Server 8: Embed.su (1080p Multi-CDN High Uptime)
+  sources.push({
+    id: `embedsu-${tmdbId}`,
+    url: isMovie
+      ? `https://embed.su/embed/movie/${tmdbId}`
+      : `https://embed.su/embed/tv/${tmdbId}/${s}/${ep}`,
+    streamable: true,
+    type: "embed",
+    quality: "1080p",
+    audioTracks: ["English", "Multi", "Original"],
+    provider: {
+      id: "embedsu",
+      name: "Embed.su (1080p Multi-CDN)",
+      latency: 20,
+    },
+  });
+
+  // Server 9: VidSrc PM (Cloudflare Ultra CDN, 100% unblocked, 1080p Original Audio)
   sources.push({
     id: `vidsrc-pm-${tmdbId}`,
     url: isMovie
@@ -497,7 +548,7 @@ export function getAvailableMediaSources(
     },
   });
 
-  // Server 7: VidSrc SU (High Availability Mirror, unblocked, 1080p Original Audio)
+  // Server 10: VidSrc SU (High Availability Mirror, unblocked, 1080p Original Audio)
   sources.push({
     id: `vidsrc-su-${tmdbId}`,
     url: isMovie
@@ -514,7 +565,7 @@ export function getAvailableMediaSources(
     },
   });
 
-  // Server 8: 2Embed CC (Direct Stream Host, unblocked)
+  // Server 11: 2Embed CC (Direct Stream Host, unblocked)
   sources.push({
     id: `2embed-${tmdbId}`,
     url: isMovie

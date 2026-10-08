@@ -4,7 +4,7 @@ export const hi: Translations = {
   common: {
     appName: "मूवबाज़ार",
     search: "खोजें",
-    searchPlaceholder: "फ़िल्में, टीवी शो खोजें...",
+    searchPlaceholder: "फ़िल्में, वेब सीरीज़, धारावाहिक, एनीमे खोजें...",
     language: "भाषा",
     settings: "सेटिंग्स",
     loading: "लोड हो रहा है...",

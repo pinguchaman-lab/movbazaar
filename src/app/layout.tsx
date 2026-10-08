@@ -4,6 +4,7 @@ import { LanguageProvider } from "@/i18n";
 import { AuthProvider } from "@/context/AuthContext";
 import { LoginModal } from "@/components/auth/LoginModal";
 import { Navbar } from "@/components/navbar/Navbar";
+import { AdScripts } from "@/components/ads/AdScripts";
 import Link from "next/link";
 import { Play, Sparkles, Shield, Film, Tv, Globe, Clapperboard } from "lucide-react";
 
@@ -113,6 +114,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen bg-[#09090b] text-zinc-100 antialiased selection:bg-[#e50914] selection:text-white flex flex-col font-sans">
         <AuthProvider>
+          <AdScripts />
           <LanguageProvider>
             <Navbar />
             <LoginModal />
@@ -175,18 +177,38 @@ export default function RootLayout({
                         </Link>
                       </li>
                       <li>
-                        <Link href="/movies?category=indian" className="hover:text-amber-400 transition-colors">
-                          Indian Cinema (Bollywood)
+                        <Link href="/tv?category=indian-tv" className="hover:text-emerald-400 transition-colors">
+                          📺 TV Serials &amp; Reality Shows
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/tv?category=web-series" className="hover:text-yellow-400 transition-colors">
+                          ⚡ Desi Web Series
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/tv?category=anime" className="hover:text-pink-400 transition-colors">
+                          ⛩️ Anime (Hindi Dub &amp; Sub)
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/movies?category=south-indian" className="hover:text-orange-400 transition-colors">
+                          🔥 South Indian (Hindi Dub)
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/movies?category=bollywood" className="hover:text-red-400 transition-colors">
+                          🎬 Bollywood Cinema
                         </Link>
                       </li>
                       <li>
                         <Link href="/tv?category=korean" className="hover:text-purple-400 transition-colors">
-                          Korean Drama (K-Dramas)
+                          🇰🇷 Korean Drama (K-Dramas)
                         </Link>
                       </li>
                       <li>
                         <Link href="/movies?category=hollywood" className="hover:text-sky-400 transition-colors">
-                          Hollywood Blockbusters
+                          🍿 Hollywood Blockbusters
                         </Link>
                       </li>
                     </ul>

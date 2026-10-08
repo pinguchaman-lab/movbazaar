@@ -2,7 +2,7 @@ export const en = {
   common: {
     appName: "MovBazaar",
     search: "Search",
-    searchPlaceholder: "Search movies, TV shows...",
+    searchPlaceholder: "Search movies, web series, serials, anime...",
     language: "Language",
     settings: "Settings",
     loading: "Loading...",

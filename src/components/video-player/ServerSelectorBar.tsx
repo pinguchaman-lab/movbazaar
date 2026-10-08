@@ -69,7 +69,9 @@ export function ServerSelectorBar({
         (s) =>
           s.id.includes("multiembed") ||
           s.id.includes("vidlink") ||
+          s.id.includes("superembed") ||
           s.id.includes("smashystream") ||
+          s.id.includes("moviesapi") ||
           s.id.includes("autoembed") ||
           s.id.includes("vidsrc-cc") ||
           s.audioTracks?.includes("Hindi") ||
@@ -83,6 +85,7 @@ export function ServerSelectorBar({
         (s) =>
           s.id.includes("vidsrc-pm") ||
           s.id.includes("vidsrc-su") ||
+          s.id.includes("embedsu") ||
           s.id.includes("2embed") ||
           s.id.includes("vidlink")
       );
@@ -98,7 +101,9 @@ export function ServerSelectorBar({
       const isDualAudio =
         s.id.includes("multiembed") ||
         s.id.includes("vidlink") ||
+        s.id.includes("superembed") ||
         s.id.includes("smashystream") ||
+        s.id.includes("moviesapi") ||
         s.id.includes("autoembed") ||
         s.id.includes("vidsrc-cc") ||
         s.audioTracks?.includes("Hindi") ||
@@ -108,6 +113,7 @@ export function ServerSelectorBar({
       const isOriginal =
         s.id.includes("vidsrc-pm") ||
         s.id.includes("vidsrc-su") ||
+        s.id.includes("embedsu") ||
         s.id.includes("2embed") ||
         s.id.includes("vidlink") ||
         s.audioTracks?.includes("Original") ||
@@ -118,6 +124,9 @@ export function ServerSelectorBar({
     if (filter === "fast") {
       return (
         s.id.includes("vidlink") ||
+        s.id.includes("superembed") ||
+        s.id.includes("moviesapi") ||
+        s.id.includes("embedsu") ||
         s.id.includes("vidsrc-pm") ||
         s.id.includes("vidsrc-su") ||
         s.id.includes("multiembed") ||
@@ -127,6 +136,7 @@ export function ServerSelectorBar({
     if (filter === "loud") {
       return (
         s.id.includes("vidlink") ||
+        s.id.includes("superembed") ||
         s.id.includes("autoembed") ||
         s.id.includes("multiembed") ||
         s.type === "hls"

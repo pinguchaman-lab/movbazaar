@@ -25,6 +25,16 @@ export async function GET(req: NextRequest) {
 
   const trimmed = q.trim();
   const lowerQ = trimmed.toLowerCase();
+  const aliasMap: Record<string, string> = {
+    tmkoc: "taarak mehta",
+    bb: "bigg boss",
+    kapil: "kapil sharma",
+    yrkkh: "yeh rishta",
+    aot: "attack on titan",
+    dbz: "dragon ball",
+    jjk: "jujutsu kaisen",
+  };
+  const aliasQ = aliasMap[lowerQ] || lowerQ;
   const data = await searchMulti(trimmed, page);
 
   if (!data?.results || data.results.length === 0) {
@@ -41,8 +51,8 @@ export async function GET(req: NextRequest) {
 
     const title = getItemTitle(item).toLowerCase();
 
-    // If title directly contains search query, allow it
-    if (title.includes(lowerQ)) return true;
+    // If title directly contains search query or alias, allow it
+    if (title.includes(lowerQ) || title.includes(aliasQ)) return true;
 
     // Discard zero-vote or obscure noise entries unless it's a recent 2025/2026 title
     const date = getItemDate(item);
@@ -63,13 +73,13 @@ export async function GET(req: NextRequest) {
     const titleA = getItemTitle(a).toLowerCase();
     const titleB = getItemTitle(b).toLowerCase();
 
-    const exactA = titleA === lowerQ;
-    const exactB = titleB === lowerQ;
+    const exactA = titleA === lowerQ || titleA === aliasQ;
+    const exactB = titleB === lowerQ || titleB === aliasQ;
     if (exactA && !exactB) return -1;
     if (!exactA && exactB) return 1;
 
-    const startsA = titleA.startsWith(lowerQ);
-    const startsB = titleB.startsWith(lowerQ);
+    const startsA = titleA.startsWith(lowerQ) || titleA.startsWith(aliasQ);
+    const startsB = titleB.startsWith(lowerQ) || titleB.startsWith(aliasQ);
     if (startsA && !startsB) return -1;
     if (!startsA && startsB) return 1;
 

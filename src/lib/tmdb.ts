@@ -352,7 +352,16 @@ export async function discoverTV({
     params.with_genres = genreId;
   }
 
-  if (category === "south-indian") {
+  if (category === "indian-tv") {
+    params.with_original_language = "hi";
+    params.with_genres = "35,10764,10766,10767";
+  } else if (category === "web-series") {
+    params.with_original_language = "hi";
+    params.with_genres = "18,80,10759";
+  } else if (category === "anime") {
+    params.with_original_language = "ja";
+    params.with_genres = "16";
+  } else if (category === "south-indian") {
     params.with_original_language = "te|ta|ml|kn";
   } else if (category === "bollywood") {
     params.with_original_language = "hi";
@@ -395,7 +404,30 @@ export async function discoverTV({
 
   let results = [...FALLBACK_TV_SHOWS];
 
-  if (category === "south-indian") {
+  if (category === "indian-tv") {
+    const filtered = results.filter(
+      (t) =>
+        [46187, 105971, 32367, 66688, 46195].includes(t.id) ||
+        t.genre_ids?.some((g) => [10764, 10766, 10767].includes(g))
+    );
+    if (filtered.length > 0) results = filtered;
+  } else if (category === "web-series") {
+    const filtered = results.filter(
+      (t) =>
+        t.original_language === "hi" &&
+        ([84088, 101087, 92783, 111803, 218230, 100122, 88040].includes(t.id) ||
+          t.genre_ids?.some((g) => [80, 18].includes(g)))
+    );
+    if (filtered.length > 0) results = filtered;
+  } else if (category === "anime") {
+    const filtered = results.filter(
+      (t) =>
+        t.original_language === "ja" ||
+        t.genre_ids?.includes(16) ||
+        [73223, 46260, 85937, 1429, 95479].includes(t.id)
+    );
+    if (filtered.length > 0) results = filtered;
+  } else if (category === "south-indian") {
     const filtered = results.filter((t) =>
       ["te", "ta", "ml", "kn"].includes(t.original_language || "")
     );
@@ -580,6 +612,35 @@ export async function getTVTrailer(id: number): Promise<string | null> {
   return videos[0]?.key || null;
 }
 
+const SEARCH_ALIASES: Record<string, string> = {
+  tmkoc: "Taarak Mehta Ka Ooltah Chashmah",
+  "tarak mehta": "Taarak Mehta Ka Ooltah Chashmah",
+  "taarak mehta": "Taarak Mehta Ka Ooltah Chashmah",
+  bb: "Bigg Boss",
+  "big boss": "Bigg Boss",
+  "bigg boss": "Bigg Boss",
+  kapil: "The Kapil Sharma Show",
+  "kapil sharma": "The Kapil Sharma Show",
+  yrkkh: "Yeh Rishta Kya Kehlata Hai",
+  "yeh rishta": "Yeh Rishta Kya Kehlata Hai",
+  mirzapur: "Mirzapur",
+  panchayat: "Panchayat",
+  "the family man": "The Family Man",
+  "family man": "The Family Man",
+  "scam 1992": "Scam 1992",
+  asur: "Asur",
+  farzi: "Farzi",
+  "kota factory": "Kota Factory",
+  aot: "Attack on Titan",
+  "attack on titan": "Attack on Titan",
+  dbz: "Dragon Ball Z",
+  jjk: "Jujutsu Kaisen",
+  "jujutsu kaisen": "Jujutsu Kaisen",
+  naruto: "Naruto",
+  "demon slayer": "Demon Slayer",
+  "black clover": "Black Clover",
+};
+
 export async function searchMulti(
   query: string,
   page = 1
@@ -588,9 +649,13 @@ export async function searchMulti(
     return { page: 1, results: [], total_pages: 0, total_results: 0 };
   }
 
+  const trimmed = query.trim();
+  const lowerQ = trimmed.toLowerCase();
+  const effectiveQuery = SEARCH_ALIASES[lowerQ] || trimmed;
+
   const data = await tmdbFetch<TMDBPaginatedResponse<MediaItem>>(
     "/search/multi",
-    { query, page },
+    { query: effectiveQuery, page },
     7200,
     1200
   );
@@ -602,15 +667,19 @@ export async function searchMulti(
   }
 
   // Fallback search
-  const q = query.toLowerCase();
+  const q = effectiveQuery.toLowerCase();
   const matchedMovies = FALLBACK_MOVIES.filter(
     (m) =>
-      m.title.toLowerCase().includes(q) || m.overview.toLowerCase().includes(q)
+      m.title.toLowerCase().includes(q) ||
+      m.overview.toLowerCase().includes(q) ||
+      (m.original_title && m.original_title.toLowerCase().includes(q))
   ).map((m) => ({ ...m, media_type: "movie" as const }));
 
   const matchedTV = FALLBACK_TV_SHOWS.filter(
     (t) =>
-      t.name.toLowerCase().includes(q) || t.overview.toLowerCase().includes(q)
+      t.name.toLowerCase().includes(q) ||
+      t.overview.toLowerCase().includes(q) ||
+      (t.original_name && t.original_name.toLowerCase().includes(q))
   ).map((t) => ({ ...t, media_type: "tv" as const }));
 
   const combined = [...matchedMovies, ...matchedTV];

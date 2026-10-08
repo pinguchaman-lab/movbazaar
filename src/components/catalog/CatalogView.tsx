@@ -89,6 +89,9 @@ export function CatalogView({
   const categories = [
     { id: "all", label: "All Collections" },
     { id: "hindi-dubbed", label: "🇮🇳 Hindi Dubbed / Dual Audio", color: "text-amber-400" },
+    { id: "indian-tv", label: "📺 TV Serials & Reality Shows", color: "text-emerald-400" },
+    { id: "web-series", label: "⚡ Desi Web Series", color: "text-yellow-400" },
+    { id: "anime", label: "⛩️ Anime (Hindi Dub & Sub)", color: "text-pink-400" },
     { id: "south-indian", label: "🔥 South Indian (Hindi Dub)", color: "text-orange-400" },
     { id: "bollywood", label: "🎬 Bollywood (Hindi)", color: "text-red-400" },
     { id: "hollywood", label: "🍿 Hollywood (Hindi & Eng)", color: "text-sky-400" },
