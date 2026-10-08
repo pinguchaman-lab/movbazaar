@@ -39,12 +39,17 @@ In the **Environment Variables** section on Vercel, add the following key-value 
 
 | Variable Name | Value | Purpose |
 |---------------|-------|---------|
+| `NEXT_PUBLIC_TMDB_API_KEY` | `c48ed38773d7b8a1d1b558a666154e28` | Fetches movie & TV metadata and posters |
+| `NEXT_PUBLIC_TMDB_IMAGE_BASE_URL` | `https://image.tmdb.org/t/p` | TMDB image CDN base URL |
+| `NEXT_PUBLIC_OMSS_API_URL` | `http://localhost:3000` | Fallback OMSS endpoint |
+| `VIP_USERS` | `vip@movbazaar.com:movbazaar2026,admin@movbazaar.com:admin2026` | Email:Password credentials for Ad-Free VIP access |
 | `TMDB_API_KEY` | `your_tmdb_api_key_here` | Server-private TMDB key (never exposed to browser clients) |
 | `NEXT_PUBLIC_TMDB_IMAGE_BASE_URL` | `https://image.tmdb.org/t/p` | TMDB poster & backdrop image CDN |
 | `VIP_SECRET` | `generate_random_32_char_secret` | Cryptographic secret for signing tamper-proof VIP tokens |
 | `VIP_USERS` | `user@movbazaar.com:SecretPass2026` | Comma-separated `Email:Password` list for Ad-Free VIP accounts |
 | `NEXT_PUBLIC_SITE_URL` | `https://movbazaar.vercel.app` | Canonical domain for sitemap and SEO indexation |
 
+> **Tip:** You can issue any credentials you wish by adding `custom@email.com:password123` to the `VIP_USERS` list separated by commas!
 > **Security Note:** `TMDB_API_KEY` and `VIP_SECRET` are strictly kept server-side on Vercel functions and are **never** included in client JavaScript bundles or network requests, ensuring zero traceability. You can issue VIP accounts to anyone simply by adding `newuser@domain.com:Password123` to `VIP_USERS`.
 
 ### Step 4: Click Deploy!

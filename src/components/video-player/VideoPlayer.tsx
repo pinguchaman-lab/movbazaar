@@ -89,6 +89,13 @@ export function VideoPlayer({
   const [isFinished, setIsFinished] = useState(false);
   const [playerError, setPlayerError] = useState<string | null>(null);
 
+  // Web Audio API Booster refs & state
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const gainNodeRef = useRef<GainNode | null>(null);
+  const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
+  const [boostLevel, setBoostLevel] = useState<number>(1);
+  const [boostMenuOpen, setBoostMenuOpen] = useState<boolean>(false);
+
   // Quality, Audio, Subtitle states
   const [availableQualities, setAvailableQualities] = useState<QualityOption[]>(
     []
@@ -106,6 +113,83 @@ export function VideoPlayer({
   const [selectedSubtitleId, setSelectedSubtitleId] = useState<string>("off");
 
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Initialize Web Audio API Volume Booster
+  const initAudioBoost = useCallback(() => {
+    const video = videoRef.current;
+    if (!video || typeof window === "undefined") return;
+
+    if (!audioCtxRef.current) {
+      try {
+        const AudioContextClass =
+          window.AudioContext ||
+          (window as unknown as { webkitAudioContext: typeof AudioContext })
+            .webkitAudioContext;
+        if (!AudioContextClass) return;
+
+        const ctx = new AudioContextClass();
+        const gain = ctx.createGain();
+        const compressor = ctx.createDynamicsCompressor();
+
+        // Transparent compression limiter to avoid clipping distortion
+        compressor.threshold.setValueAtTime(-6, ctx.currentTime);
+        compressor.knee.setValueAtTime(6, ctx.currentTime);
+        compressor.ratio.setValueAtTime(8, ctx.currentTime);
+        compressor.attack.setValueAtTime(0.005, ctx.currentTime);
+        compressor.release.setValueAtTime(0.2, ctx.currentTime);
+
+        const srcNode = ctx.createMediaElementSource(video);
+        srcNode.connect(gain);
+        gain.connect(compressor);
+        compressor.connect(ctx.destination);
+
+        audioCtxRef.current = ctx;
+        gainNodeRef.current = gain;
+        sourceNodeRef.current = srcNode;
+      } catch (err) {
+        console.warn("AudioContext init info:", err);
+      }
+    }
+
+    if (audioCtxRef.current && audioCtxRef.current.state === "suspended") {
+      audioCtxRef.current.resume().catch(() => {});
+    }
+  }, []);
+
+  const handleBoostChange = useCallback(
+    (multiplier: number) => {
+      setBoostLevel(multiplier);
+      setBoostMenuOpen(false);
+
+      if (multiplier > 1) {
+        initAudioBoost();
+      }
+
+      if (gainNodeRef.current && audioCtxRef.current) {
+        try {
+          gainNodeRef.current.gain.setValueAtTime(
+            multiplier,
+            audioCtxRef.current.currentTime
+          );
+        } catch (err) {
+          console.warn("Failed to set gain value:", err);
+        }
+      }
+    },
+    [initAudioBoost]
+  );
+
+  // Cleanup Web Audio on unmount
+  useEffect(() => {
+    return () => {
+      if (audioCtxRef.current && audioCtxRef.current.state !== "closed") {
+        audioCtxRef.current.close().catch(() => {});
+        audioCtxRef.current = null;
+        gainNodeRef.current = null;
+        sourceNodeRef.current = null;
+      }
+    };
+  }, []);
 
   // Synchronize when activeSourceId is updated externally
   useEffect(() => {
@@ -145,11 +229,11 @@ export function VideoPlayer({
       clearTimeout(controlsTimeoutRef.current);
     }
     controlsTimeoutRef.current = setTimeout(() => {
-      if (isPlaying && !speedMenuOpen) {
+      if (isPlaying && !speedMenuOpen && !boostMenuOpen) {
         setShowControls(false);
       }
     }, 3500);
-  }, [isPlaying, speedMenuOpen]);
+  }, [isPlaying, speedMenuOpen, boostMenuOpen]);
 
   // Controls Actions wrapped in useCallback
   const togglePlay = useCallback(() => {
@@ -483,6 +567,18 @@ export function VideoPlayer({
           e.preventDefault();
           toggleMute();
           break;
+        case "b":
+          e.preventDefault();
+          const nextBoost =
+            boostLevel === 1
+              ? 1.5
+              : boostLevel === 1.5
+              ? 2
+              : boostLevel === 2
+              ? 3
+              : 1;
+          handleBoostChange(nextBoost);
+          break;
         case "arrowleft":
           e.preventDefault();
           seekBy(-10);
@@ -505,7 +601,17 @@ export function VideoPlayer({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [volume, handleUserActivity, togglePlay, toggleFullscreen, toggleMute, seekBy, changeVolume]);
+  }, [
+    volume,
+    boostLevel,
+    handleUserActivity,
+    togglePlay,
+    toggleFullscreen,
+    toggleMute,
+    seekBy,
+    changeVolume,
+    handleBoostChange,
+  ]);
 
   const handleSeekChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const video = videoRef.current;
@@ -725,12 +831,23 @@ export function VideoPlayer({
             </div>
           </div>
 
-          {/* Server Switcher on Header */}
-          <ServerSelector
-            sources={sources}
-            activeSourceId={activeSource.id}
-            onSelectSource={handleSourceSelect}
-          />
+          {/* Server Switcher & Audio Tip on Header */}
+          <div className="flex items-center gap-2">
+            {activeSource.type === "embed" && (
+              <div
+                className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-black/60 backdrop-blur-md border border-white/10 text-[11px] text-zinc-300"
+                title="Low audio? Switch to Server 1 or ensure in-video volume is 100%"
+              >
+                <Volume2 className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+                <span>Low audio? Try Server 1 or 4</span>
+              </div>
+            )}
+            <ServerSelector
+              sources={sources}
+              activeSourceId={activeSource.id}
+              onSelectSource={handleSourceSelect}
+            />
+          </div>
         </div>
       </div>
 
@@ -793,7 +910,7 @@ export function VideoPlayer({
                 <RotateCw className="w-4 h-4" />
               </button>
 
-              {/* Volume Slider */}
+              {/* Volume Slider & Audio Booster */}
               <div className="flex items-center gap-1.5 group/volume">
                 <button
                   onClick={toggleMute}
@@ -813,8 +930,55 @@ export function VideoPlayer({
                   step={0.05}
                   value={isMuted ? 0 : volume}
                   onChange={(e) => changeVolume(parseFloat(e.target.value))}
-                  className="w-14 sm:w-20 h-1 bg-white/20 rounded cursor-pointer"
+                  className="w-14 sm:w-16 h-1 bg-white/20 rounded cursor-pointer"
                 />
+
+                {/* Audio Booster (150% - 300%) */}
+                <div className="relative">
+                  <button
+                    onClick={() => setBoostMenuOpen(!boostMenuOpen)}
+                    className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all flex items-center gap-1 border ${
+                      boostLevel > 1
+                        ? "bg-amber-500 text-black border-amber-400 shadow-sm shadow-amber-500/40"
+                        : "bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white border-white/10"
+                    }`}
+                    title="Volume Booster (Press B to cycle)"
+                  >
+                    <span>{boostLevel > 1 ? `${Math.round(boostLevel * 100)}% Boost` : "Boost"}</span>
+                  </button>
+
+                  {boostMenuOpen && (
+                    <div className="absolute bottom-full left-0 mb-2 w-36 bg-zinc-900 border border-zinc-700/80 rounded-xl shadow-2xl overflow-hidden z-50 py-1.5 px-1 space-y-1">
+                      <div className="px-2 py-1 text-[10px] font-bold text-zinc-400 uppercase tracking-wider border-b border-zinc-800">
+                        Audio Amplifier
+                      </div>
+                      {[
+                        { level: 1, label: "100% (Normal)" },
+                        { level: 1.5, label: "150% (Clear)" },
+                        { level: 2, label: "200% (High)" },
+                        { level: 3, label: "300% (Max)" },
+                      ].map((item) => (
+                        <button
+                          key={item.level}
+                          onClick={() => handleBoostChange(item.level)}
+                          className={`w-full text-left px-2.5 py-1.5 text-xs rounded-lg transition-colors flex items-center justify-between ${
+                            boostLevel === item.level
+                              ? "bg-amber-500/20 text-amber-300 font-bold"
+                              : "text-zinc-300 hover:bg-white/10 hover:text-white"
+                          }`}
+                        >
+                          <span>{item.label}</span>
+                          {boostLevel === item.level && (
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                          )}
+                        </button>
+                      ))}
+                      <div className="px-2 pt-1 text-[9px] text-zinc-500 leading-tight border-t border-zinc-800">
+                        Press <strong>B</strong> on keyboard to cycle boost levels.
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Time Display */}

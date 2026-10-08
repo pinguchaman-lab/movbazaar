@@ -134,9 +134,6 @@ export function Navbar() {
     { label: t.nav.history, href: "/history", icon: History },
   ];
 
-  const moviesResults = searchResults.filter((item) => item.media_type === "movie");
-  const tvResults = searchResults.filter((item) => item.media_type === "tv");
-
   return (
     <>
       <header
@@ -204,106 +201,79 @@ export function Navbar() {
 
               {/* Autocomplete Dropdown */}
               {searchDropdownOpen && searchResults.length > 0 && (
-                <div className="absolute top-full right-0 left-0 sm:left-auto sm:w-80 sm:-right-4 mt-2 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-150">
+                <div className="absolute top-full right-0 left-0 sm:left-auto sm:w-88 sm:-right-4 mt-2 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-150">
                   <div className="max-h-96 overflow-y-auto divide-y divide-zinc-800/60 no-scrollbar">
-                    {moviesResults.length > 0 && (
-                      <div className="p-2">
-                        <div className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider px-2 py-1">
-                          {t.search.moviesFound}
-                        </div>
-                        {moviesResults.map((movie) => {
-                          const year = movie.release_date
-                            ? new Date(movie.release_date).getFullYear()
-                            : "";
-                          return (
-                            <Link
-                              key={`movie-${movie.id}`}
-                              href={`/movie/${movie.id}`}
-                              prefetch={true}
-                              onMouseEnter={() => router.prefetch(`/movie/${movie.id}`)}
-                              onClick={() => setSearchDropdownOpen(false)}
-                              className="flex items-center gap-3 p-2 rounded-lg hover:bg-zinc-800/80 transition-colors group"
-                            >
-                              <div className="relative w-9 h-12 rounded overflow-hidden bg-zinc-800 flex-shrink-0">
-                                <Image
-                                  src={getTmdbImageUrl(movie.poster_path, "w300")}
-                                  alt={movie.title || "Poster"}
-                                  fill
-                                  sizes="36px"
-                                  className="object-cover group-hover:scale-105 transition-transform"
-                                />
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <div className="text-xs font-medium text-zinc-100 truncate group-hover:text-[#e50914] transition-colors">
-                                  {movie.title}
-                                </div>
-                                <div className="text-[10px] text-zinc-400 flex items-center gap-1.5">
-                                  <span>{year || "Movie"}</span>
-                                  <span>•</span>
-                                  <span className="flex items-center text-cinema-gold font-medium">
-                                    <Star className="w-2.5 h-2.5 fill-cinema-gold mr-0.5" />
-                                    {movie.vote_average ? movie.vote_average.toFixed(1) : "—"}
-                                  </span>
-                                </div>
-                              </div>
-                            </Link>
-                          );
-                        })}
+                    <div className="p-2 space-y-1">
+                      <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider px-2 py-1 flex items-center justify-between">
+                        <span>Top Results</span>
+                        <span className="text-zinc-500 font-normal">Relevance Ranked</span>
                       </div>
-                    )}
 
-                    {tvResults.length > 0 && (
-                      <div className="p-2">
-                        <div className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider px-2 py-1">
-                          {t.search.tvFound}
-                        </div>
-                        {tvResults.map((show) => {
-                          const year = show.first_air_date
-                            ? new Date(show.first_air_date).getFullYear()
-                            : "";
-                          return (
-                            <Link
-                              key={`tv-${show.id}`}
-                              href={`/tv/${show.id}`}
-                              prefetch={true}
-                              onMouseEnter={() => router.prefetch(`/tv/${show.id}`)}
-                              onClick={() => setSearchDropdownOpen(false)}
-                              className="flex items-center gap-3 p-2 rounded-lg hover:bg-zinc-800/80 transition-colors group"
-                            >
-                              <div className="relative w-9 h-12 rounded overflow-hidden bg-zinc-800 flex-shrink-0">
-                                <Image
-                                  src={getTmdbImageUrl(show.poster_path, "w300")}
-                                  alt={show.name || "Poster"}
-                                  fill
-                                  sizes="36px"
-                                  className="object-cover group-hover:scale-105 transition-transform"
-                                />
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <div className="text-xs font-medium text-zinc-100 truncate group-hover:text-[#e50914] transition-colors">
-                                  {show.name}
-                                </div>
-                                <div className="text-[10px] text-zinc-400 flex items-center gap-1.5">
-                                  <span>{year || "TV Show"}</span>
-                                  <span>•</span>
-                                  <span className="flex items-center text-cinema-gold font-medium">
-                                    <Star className="w-2.5 h-2.5 fill-cinema-gold mr-0.5" />
-                                    {show.vote_average ? show.vote_average.toFixed(1) : "—"}
-                                  </span>
-                                </div>
-                              </div>
-                            </Link>
-                          );
-                        })}
-                      </div>
-                    )}
+                      {searchResults.map((item) => {
+                        const isTv = item.media_type === "tv";
+                        const title = isTv ? item.name : item.title;
+                        const date = isTv ? item.first_air_date : item.release_date;
+                        const year = date ? new Date(date).getFullYear() : "";
+                        const href = isTv ? `/tv/${item.id}` : `/movie/${item.id}`;
 
-                    <div className="p-2 bg-zinc-950/50">
+                        return (
+                          <Link
+                            key={`${item.media_type}-${item.id}`}
+                            href={href}
+                            prefetch={true}
+                            onMouseEnter={() => router.prefetch(href)}
+                            onClick={() => setSearchDropdownOpen(false)}
+                            className="flex items-center gap-3 p-2 rounded-lg hover:bg-zinc-800/80 transition-colors group"
+                          >
+                            <div className="relative w-9 h-12 rounded overflow-hidden bg-zinc-800 flex-shrink-0">
+                              <Image
+                                src={getTmdbImageUrl(item.poster_path, "w300")}
+                                alt={title || "Poster"}
+                                fill
+                                sizes="36px"
+                                className="object-cover group-hover:scale-105 transition-transform"
+                              />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-semibold text-zinc-100 truncate group-hover:text-[#e50914] transition-colors">
+                                  {title}
+                                </span>
+                              </div>
+                              <div className="text-[10px] text-zinc-400 flex items-center gap-1.5 mt-0.5">
+                                <span
+                                  className={`px-1 py-0.2 rounded text-[9px] font-bold uppercase tracking-wider ${
+                                    isTv
+                                      ? "bg-sky-500/20 text-sky-400 border border-sky-500/30"
+                                      : "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                                  }`}
+                                >
+                                  {isTv ? "TV Series (Seasons)" : "Movie"}
+                                </span>
+                                <span>•</span>
+                                <span>{year || (isTv ? "Series" : "Film")}</span>
+                                {item.vote_average ? (
+                                  <>
+                                    <span>•</span>
+                                    <span className="flex items-center text-cinema-gold font-medium">
+                                      <Star className="w-2.5 h-2.5 fill-cinema-gold mr-0.5" />
+                                      {item.vote_average.toFixed(1)}
+                                    </span>
+                                  </>
+                                ) : null}
+                              </div>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+
+                    <div className="p-2 bg-zinc-950/70">
                       <button
                         onClick={handleSearchSubmit}
-                        className="w-full py-1.5 px-3 text-center text-xs font-medium text-[#e50914] hover:bg-zinc-800 rounded transition-colors"
+                        className="w-full py-1.5 px-3 text-center text-xs font-semibold text-[#e50914] hover:bg-zinc-850 rounded transition-colors"
                       >
-                        {t.common.viewAll} ({searchResults.length}+)
+                        {t.common.viewAll} ({searchResults.length}+ results)
                       </button>
                     </div>
                   </div>

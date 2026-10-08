@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getTVDetails, getTVSeasonDetails, getTVTrailer } from "@/lib/tmdb";
 import { getEpisodeSources, getDemoSampleSources } from "@/lib/omss";
 import { WatchPlayerContainer } from "@/components/video-player/WatchPlayerContainer";
+import { EpisodeList } from "@/components/episode-list/EpisodeList";
 import { Play, Sparkles } from "lucide-react";
 
 import { Metadata } from "next";
@@ -164,6 +165,19 @@ export default async function WatchTVPage({
             )}
           </div>
         </div>
+
+        {/* Season & Episode Selector Bar & Grid */}
+        {tvShow.seasons && tvShow.seasons.length > 0 && (
+          <div className="pt-2">
+            <EpisodeList
+              tvId={tvShow.id}
+              seasons={tvShow.seasons}
+              initialEpisodes={seasonDetail?.episodes || []}
+              currentSeason={seasonNum}
+              currentEpisode={episodeNum}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
